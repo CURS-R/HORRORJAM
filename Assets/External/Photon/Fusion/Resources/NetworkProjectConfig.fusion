@@ -156,9 +156,13 @@
     "AssembliesToWeave": [
         "Assembly-CSharp",
         "Assembly-CSharp-firstpass",
-        "CURSR.Networking",
+        "CURSR",
+        "CURSR.Display",
+        "CURSR.Game",
+        "CURSR.Network",
         "CURSR.Settings",
-        "CURSR.Utils"
+        "CURSR.Utils",
+        "CURSR.Resources"
     ],
     "UseSerializableDictionary": true,
     "NullChecksForNetworkedProperties": true,
