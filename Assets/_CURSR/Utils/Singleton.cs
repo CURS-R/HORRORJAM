@@ -10,7 +10,7 @@ namespace CURSR.Utils
         
         private static T _instance;
 
-        public static T Instance
+        /*public static T Instance
         {
             get
             {
@@ -35,6 +35,36 @@ namespace CURSR.Utils
             {
                 Destroy(gameObject);
             }
+        }*/
+
+        public static T Instance
+        {
+            get
+            {
+                if (_instance == null)
+                {
+                    _instance = FindObjectOfType<T>();
+                    if(_instance == null)
+                    {
+                        _instance = new GameObject().AddComponent<T>();
+                    }
+                }
+                return _instance;
+            }
+        }
+
+        protected virtual void Awake()
+        {
+            if(_instance != null)
+            {
+                Destroy(this);
+                return;
+            }
+
+            _instance = this as T;
+            Init();
+            DontDestroyOnLoad(this);
+            this.Initialized = true;
         }
 
         /// <summary>
