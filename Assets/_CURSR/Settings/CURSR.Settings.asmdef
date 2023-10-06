@@ -1,7 +1,9 @@
 {
     "name": "CURSR.Settings",
     "rootNamespace": "CURSR.Settings",
-    "references": [],
+    "references": [
+        "GUID:d28276d3b667e2b45acf90994c3edac2"
+    ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,

@@ -1,7 +1,10 @@
 {
-    "name": "CURSR.Networking",
-    "rootNamespace": "CURSR.Networking",
-    "references": [],
+    "name": "CURSR.Network",
+    "rootNamespace": "CURSR.Network",
+    "references": [
+        "GUID:a0208b1d2bc83cf44be2d39789881ba9",
+        "GUID:d28276d3b667e2b45acf90994c3edac2"
+    ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
