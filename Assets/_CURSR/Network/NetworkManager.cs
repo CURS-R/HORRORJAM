@@ -6,6 +6,7 @@ using Fusion.Sockets;
 using UnityEngine.SceneManagement;
 using CURSR.Utils;
 using Random = UnityEngine.Random;
+using CTU = CURSR.Utils.ConnectionTokenUtils;
 
 namespace CURSR.Network
 {
@@ -14,17 +15,12 @@ namespace CURSR.Network
     /// </summary>
     public class NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
     {
-        [field: SerializeField] private NetworkContainer container;
+        [field:SerializeField] private NetworkContainer container;
         
         private NetworkRunner runnerPrefab => container.RunnerPrefab;
-        
-        public static NetworkRunner Runner { get; private set; }
-        
-        private byte[] localConnectionToken;
-        public int localConnectionTokenHashed => ConnectionTokenUtils.HashToken(localConnectionToken);
-        private HashSet<int> playerTokens;
+        private static NetworkRunner Runner { get; set; }
 
-        private bool isHost(NetworkRunner runner) => runner.IsSinglePlayer || runner.IsServer;
+        private bool isHost => Runner.IsSinglePlayer || Runner.IsServer;
         
         #region TESTING
         private void OnGUI()
@@ -42,9 +38,8 @@ namespace CURSR.Network
                 // Party
                 if (GUI.Button(new Rect(420,0,200,40), "JoinSpecificRoom"))
                 {
-                    Log("JoinSpecificRoom");
+                    throw new NotImplementedException();
                 }
-                GUI.Label(new Rect(630,0,200,20), "Text text text");
             }
             else
             {
@@ -59,13 +54,12 @@ namespace CURSR.Network
         protected void Awake()
         {
             // TODO: get connection token elsewhere?
-            localConnectionToken = ConnectionTokenUtils.NewToken(true);
-            Log("Our connection token: " + localConnectionTokenHashed);
+            container.localConnectionToken = CTU.NewToken(true);
         }
 
         async void StartOrJoinRoom(GameMode mode)
         {
-            playerTokens = new();
+            container.otherPlayerTokens = new();
 
             InstantiateRunner();
             
@@ -74,7 +68,7 @@ namespace CURSR.Network
                     GameMode = mode,
                     SessionName = "TestRoom",
                     Scene = SceneManager.GetActiveScene().buildIndex,
-                    ConnectionToken = localConnectionToken
+                    ConnectionToken = container.localConnectionToken
                 }
             );
         }
@@ -84,84 +78,35 @@ namespace CURSR.Network
             Runner = null;
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
         }
-
-        #region HOST MIGRATION
-        public async void OnHostMigration(NetworkRunner runner, HostMigrationToken hostMigrationToken)
-        {
-            Log("Host migration in progress!");
-            await runner.Shutdown(shutdownReason: ShutdownReason.HostMigration, destroyGameObject:true);
-            
-            InstantiateRunner();
-            
-            StartGameResult result = await Runner.StartGame(new StartGameArgs() {
-                Scene = SceneManager.GetActiveScene().buildIndex,
-                ConnectionToken = localConnectionToken,
-                HostMigrationToken = hostMigrationToken,
-                HostMigrationResume = HostMigrationResume,
-                GameMode = hostMigrationToken.GameMode,
-                // LATER: other args?
-            });
-            
-            if (result.Ok == false)
-                Debug.LogWarning(result.ShutdownReason);
-            else
-                Log("Host migration done.");
-        }
-        void HostMigrationResume(NetworkRunner runner) 
-        {
-            Log("Resuming game from host migration!");
-
-            container.InvokeHostMigrationEvent(runner);
-            
-            // TODO: code imported from external JazzApps Project
-            /*
-            foreach (var entry in FindObjectOfType<LiveGame>().GamePlayers)
-            {
-                var playerToken = entry.Key;
-                var playerGB = entry.Value;
-                playerTokens.Add(playerToken);
-                if (playerToken == localConnectionTokenHashed)
-                    playerGB.GetComponent<NetworkObject>().AssignInputAuthority(Runner.LocalPlayer);
-                Log($"Migrated {playerToken}");
-            }
-            */
-            Log($"Migrated players from LiveGame.");
-        }
-        #endregion
+        
         #region Runner Callbacks
         public void OnPlayerJoined(NetworkRunner runner, PlayerRef playerRef)
         {
-            if (!isHost(runner))
+            if (!isHost)
                 return;
-            
-            // TODO: code imported from external JazzApps Project
-            /*
-            if (container.LiveGame == null)
-                container.InvokeLaunchLiveGameEvent(runner);
-            */
-            
-            byte[] token = runner.GetPlayerConnectionToken(playerRef);
-            int playerToken = token == null ? 0 : ConnectionTokenUtils.HashToken(token);
 
-            if (playerTokens.Contains(playerToken))
+            byte[] token = runner.GetPlayerConnectionToken(playerRef);
+
+            if (token == container.localConnectionToken)
+                container.InvokeCreateRoomEvent();
+            
+            if (container.otherPlayerTokens.Contains(token))
             {
-                Log($"{playerToken} was found in the HashSet. Attempting PlayerGB assignment.");
-                // Process it as a reconnect
-                // TODO: if (runner.LocalPlayer == playerRef)
+                Log($"{CTU.HashToken(token)} was found in the HashSet. Attempting PlayerGB assignment.");
             }
             else
             {
-                Log($"No found value for token {playerToken}.");
+                Log($"No found value for token {CTU.HashToken(token)}.");
                 // If the token wasn't found then just proceed as usual Squidward
-                playerTokens.Add(playerToken);
+                container.otherPlayerTokens.Add(token);
             }
             
-            container.TryInvokePlayerJoinEvent(playerRef, playerToken);
+            container.TryInvokePlayerJoinEvent(playerRef);
         }
         public void OnPlayerLeft(NetworkRunner runner, PlayerRef playerRef) {}
         public void OnInput(NetworkRunner runner, NetworkInput input) {}
         public void OnInputMissing(NetworkRunner runner, PlayerRef player, NetworkInput input) {}
-        public void OnShutdown(NetworkRunner runner, ShutdownReason shutdownReason) { /* TODO: perhaps reload the scene idk */ }
+        public void OnShutdown(NetworkRunner runner, ShutdownReason shutdownReason) { }
         public void OnConnectedToServer(NetworkRunner runner) {}
         public void OnDisconnectedFromServer(NetworkRunner runner) {}
         public void OnConnectRequest(NetworkRunner runner, NetworkRunnerCallbackArgs.ConnectRequest request, byte[] token) {}
@@ -172,6 +117,11 @@ namespace CURSR.Network
         public void OnReliableDataReceived(NetworkRunner runner, PlayerRef player, ArraySegment<byte> data) {}
         public void OnSceneLoadDone(NetworkRunner runner) {}
         public void OnSceneLoadStart(NetworkRunner runner) {}
+        public async void OnHostMigration(NetworkRunner runner, HostMigrationToken hostMigrationToken)
+        {
+            await runner.Shutdown(shutdownReason: ShutdownReason.HostMigration, destroyGameObject:true);
+            // LATER: stretch goal, implement host migration
+        }
         #endregion
         
         private void InstantiateRunner()

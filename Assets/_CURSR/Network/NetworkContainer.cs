@@ -1,35 +1,52 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using CURSR.Utils;
 using Fusion;
 using UnityEngine;
+using CTU = CURSR.Utils.ConnectionTokenUtils;
 
 namespace CURSR.Network
 {
     [CreateAssetMenu(fileName = "NetworkContainer", menuName = "CURSR/Container/Network")]
     public class NetworkContainer : ScriptableObject
     {
-        #region FIELDS
-        
         // Serialized
         [field: Header("Prefabs")]
         [field:SerializeField] public NetworkRunner RunnerPrefab { get; private set; }
         
-        #endregion
-        
-        // MAYBE
-        //[HideInInspector] public int localPlayerIdentity;
+        // Properties
+        private byte[] _localConnectionToken;
+        public byte[] localConnectionToken
+        {
+            get
+            {
+                return _localConnectionToken;
+            }
+            set
+            {
+                Log("LocalConnectionToken changed to (hashed): " + CTU.HashToken(value));
+                _localConnectionToken = value;
+            }
+        }
+        public HashSet<byte[]> otherPlayerTokens;
 
-        public event Action<NetworkRunner> JoinRoomEvent;
-        public void InvokeJoinRoomEvent(NetworkRunner runner) => JoinRoomEvent?.Invoke(runner);
-        public event Action<NetworkRunner> HostMigrationEvent;
-        public void InvokeHostMigrationEvent(NetworkRunner newRunner) => HostMigrationEvent?.Invoke(newRunner);
+        public event Action CreateRoomEvent;
+        public void InvokeCreateRoomEvent() => CreateRoomEvent?.Invoke();
+        public event Action JoinRoomEvent;
+        public void InvokeJoinRoomEvent() => JoinRoomEvent?.Invoke();
+
+        public event Action<PlayerRef> PlayerJoinEvent;
+        public void TryInvokePlayerJoinEvent(PlayerRef playerRef)
+        {
+            PlayerJoinEvent?.Invoke(playerRef);
+        }
+        public event Action<PlayerRef> PlayerLeaveEvent;
+        public void TryInvokePlayerLeaveEvent(PlayerRef playerRef)
+        {
+            PlayerLeaveEvent?.Invoke(playerRef);
+        }
         
-        
-        
-        public event Action<PlayerRef, int> PlayerJoinEvent;
-        public void TryInvokePlayerJoinEvent(PlayerRef playerRef, int playerToken) => PlayerJoinEvent?.Invoke(playerRef, playerToken);
-        public event Action<NetworkBehaviour> PlayerLeaveEvent;
-        public void TryInvokePlayerLeaveEvent(NetworkBehaviour monoBehaviour) => PlayerLeaveEvent?.Invoke(monoBehaviour);
+        private void Log(string message) => Debug.Log(message, this);
     }
 }
