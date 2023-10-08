@@ -112,11 +112,7 @@ namespace CURSR.Network
         public void OnReliableDataReceived(NetworkRunner runner, PlayerRef player, ArraySegment<byte> data) {}
         public void OnSceneLoadDone(NetworkRunner runner) {}
         public void OnSceneLoadStart(NetworkRunner runner) {}
-        public async void OnHostMigration(NetworkRunner runner, HostMigrationToken hostMigrationToken)
-        {
-            await runner.Shutdown(shutdownReason: ShutdownReason.HostMigration, destroyGameObject:true);
-            // LATER: stretch goal, implement host migration
-        }
+        public async void OnHostMigration(NetworkRunner runner, HostMigrationToken hostMigrationToken) { await runner.Shutdown(shutdownReason: ShutdownReason.HostMigration, destroyGameObject:true); }
         #endregion
         
         private void InstantiateRunner()
