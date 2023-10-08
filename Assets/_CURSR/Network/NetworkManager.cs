@@ -15,9 +15,9 @@ namespace CURSR.Network
     /// </summary>
     public class NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
     {
-        [field:SerializeField] private NetworkContainer container;
+        [field:SerializeField] private NetworkContainer networkContainer;
         
-        private NetworkRunner runnerPrefab => container.RunnerPrefab;
+        private NetworkRunner runnerPrefab => networkContainer.RunnerPrefab;
         private static NetworkRunner Runner { get; set; }
 
         private bool isHost => Runner.IsSinglePlayer || Runner.IsServer;
@@ -54,12 +54,12 @@ namespace CURSR.Network
         protected void Awake()
         {
             // TODO: get connection token elsewhere?
-            container.localConnectionToken = CTU.NewToken(true);
+            networkContainer.localConnectionToken = CTU.NewToken(true);
         }
 
         async void StartOrJoinRoom(GameMode mode)
         {
-            container.otherPlayerTokens = new();
+            networkContainer.otherPlayerTokens = new();
 
             InstantiateRunner();
             
@@ -68,7 +68,7 @@ namespace CURSR.Network
                     GameMode = mode,
                     SessionName = "TestRoom",
                     Scene = SceneManager.GetActiveScene().buildIndex,
-                    ConnectionToken = container.localConnectionToken
+                    ConnectionToken = networkContainer.localConnectionToken
                 }
             );
             Debug.Log("StartOrJoinRoom finished.");
@@ -85,18 +85,18 @@ namespace CURSR.Network
         {
             if (!isHost) return;
 
-            byte[] token = runner.GetPlayerConnectionToken(playerRef) ?? container.localConnectionToken;
+            byte[] token = runner.GetPlayerConnectionToken(playerRef) ?? networkContainer.localConnectionToken;
             Log($"OnPlayerJoin fired, using token (hashed): {CTU.HashToken(token)}");
 
-            if (token == container.localConnectionToken)
-                container.InvokeCreateRoomEvent();
+            if (token == networkContainer.localConnectionToken)
+                networkContainer.InvokeCreateRoomEvent();
 
-            if (!container.otherPlayerTokens.Add(token))
+            if (!networkContainer.otherPlayerTokens.Add(token))
                 Log($"{CTU.HashToken(token)} was found in the HashSet. Attempting PlayerGB assignment.");
             else
                 Log($"No found value for token {CTU.HashToken(token)}.");
     
-            container.TryInvokePlayerJoinEvent(playerRef);
+            networkContainer.TryInvokePlayerJoinEvent(playerRef);
         }
         public void OnPlayerLeft(NetworkRunner runner, PlayerRef playerRef) {}
         public void OnInput(NetworkRunner runner, NetworkInput input) {}

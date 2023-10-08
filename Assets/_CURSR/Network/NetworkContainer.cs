@@ -37,16 +37,10 @@ namespace CURSR.Network
         public void InvokeJoinRoomEvent() => JoinRoomEvent?.Invoke();
 
         public event Action<PlayerRef> PlayerJoinEvent;
-        public void TryInvokePlayerJoinEvent(PlayerRef playerRef)
-        {
-            PlayerJoinEvent?.Invoke(playerRef);
-        }
+        public void TryInvokePlayerJoinEvent(PlayerRef playerRef) => PlayerJoinEvent?.Invoke(playerRef);
         public event Action<PlayerRef> PlayerLeaveEvent;
-        public void TryInvokePlayerLeaveEvent(PlayerRef playerRef)
-        {
-            PlayerLeaveEvent?.Invoke(playerRef);
-        }
-        
+        public void TryInvokePlayerLeaveEvent(PlayerRef playerRef) => PlayerLeaveEvent?.Invoke(playerRef);
+
         private void Log(string message) => Debug.Log(message, this);
     }
 }

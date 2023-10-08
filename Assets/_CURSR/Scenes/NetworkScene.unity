@@ -345,7 +345,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 11f7b66c86df09044ab997b0689cb807, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  container: {fileID: 11400000, guid: 59e25015b2a4e30438a986004bad8ecf, type: 2}
+  networkContainer: {fileID: 11400000, guid: 59e25015b2a4e30438a986004bad8ecf, type: 2}
 --- !u!1 &1329279586
 GameObject:
   m_ObjectHideFlags: 0
