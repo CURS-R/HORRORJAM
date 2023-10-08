@@ -71,6 +71,7 @@ namespace CURSR.Network
                     ConnectionToken = container.localConnectionToken
                 }
             );
+            Debug.Log("StartOrJoinRoom finished.");
         }
         async void LeaveRoom()
         {
@@ -82,25 +83,19 @@ namespace CURSR.Network
         #region Runner Callbacks
         public void OnPlayerJoined(NetworkRunner runner, PlayerRef playerRef)
         {
-            if (!isHost)
-                return;
+            if (!isHost) return;
 
-            byte[] token = runner.GetPlayerConnectionToken(playerRef);
+            byte[] token = runner.GetPlayerConnectionToken(playerRef) ?? container.localConnectionToken;
+            Log($"OnPlayerJoin fired, using token (hashed): {CTU.HashToken(token)}");
 
             if (token == container.localConnectionToken)
                 container.InvokeCreateRoomEvent();
-            
-            if (container.otherPlayerTokens.Contains(token))
-            {
+
+            if (!container.otherPlayerTokens.Add(token))
                 Log($"{CTU.HashToken(token)} was found in the HashSet. Attempting PlayerGB assignment.");
-            }
             else
-            {
                 Log($"No found value for token {CTU.HashToken(token)}.");
-                // If the token wasn't found then just proceed as usual Squidward
-                container.otherPlayerTokens.Add(token);
-            }
-            
+    
             container.TryInvokePlayerJoinEvent(playerRef);
         }
         public void OnPlayerLeft(NetworkRunner runner, PlayerRef playerRef) {}
