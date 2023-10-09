@@ -57,7 +57,7 @@ namespace CURSR.Network
             networkContainer.localConnectionToken = CTU.NewToken(true);
         }
 
-        async void StartOrJoinRoom(GameMode mode)
+        public async void StartOrJoinRoom(GameMode mode)
         {
             networkContainer.otherPlayerTokens = new();
 
@@ -73,7 +73,18 @@ namespace CURSR.Network
             );
             Debug.Log("StartOrJoinRoom finished.");
         }
-        async void LeaveRoom()
+
+        public void OpenRoom()
+        {
+            throw new NotImplementedException();
+        }
+        
+        public void CloseRoom()
+        {
+            throw new NotImplementedException();
+        }
+        
+        public async void LeaveRoom()
         {
             await Runner.Shutdown();
             Runner = null;
@@ -96,7 +107,7 @@ namespace CURSR.Network
             else
                 Log($"No found value for token {CTU.HashToken(token)}.");
     
-            networkContainer.TryInvokePlayerJoinEvent(playerRef);
+            networkContainer.InvokePlayerJoinRoomEvent(playerRef);
         }
         public void OnPlayerLeft(NetworkRunner runner, PlayerRef playerRef) {}
         public void OnInput(NetworkRunner runner, NetworkInput input) {}
