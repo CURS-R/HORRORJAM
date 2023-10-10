@@ -19,13 +19,10 @@ namespace CURSR.Network
         private byte[] _localConnectionToken;
         public byte[] localConnectionToken
         {
-            get
-            {
-                return _localConnectionToken;
-            }
+            get => _localConnectionToken;
             set
             {
-                Log("LocalConnectionToken changed to (hashed): " + CTU.HashToken(value));
+                Log($"LocalConnectionToken changed to (hashed): {CTU.HashToken(value)}");
                 _localConnectionToken = value;
             }
         }
