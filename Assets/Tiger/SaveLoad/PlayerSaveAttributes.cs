@@ -1,40 +1,63 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace CURSR
 {
     public class PlayerSaveAttributes : MonoBehaviour
     {
-        public int Currency;
-        public string Seed;
-        public float[] PlayerPos;
+        public string UserName;
+        public List<string> Seeds;
 
+        /// <summary>
+        /// Load attributes based on Game Manger's player data instance.
+        /// </summary>
         public void LoadAttributes()
         {
-            this.Currency = GameManager.Instance.PlayerData.Currency;
-            this.Seed = GameManager.Instance.PlayerData.Seed;
-            this.PlayerPos = GameManager.Instance.PlayerData.PlayerPos;
+            this.UserName = GameManager.Instance.PlayerData.UserName;
+            this.Seeds = GameManager.Instance.PlayerData.Seeds.ToList<string>();
 
             Debug.Log("<color=green>Attributes Loaded.</color>");
         }
 
-        public void SaveCurrency(int currency)
+        /// <summary>
+        /// Loads attributes based on passed in player data.
+        /// </summary>
+        /// <param name="playerData"></param>
+        public void LoadAttributes(ref PlayerData playerData)
         {
-            this.Currency = currency;
+            this.UserName = playerData.UserName;
+            this.Seeds = playerData.Seeds?.ToList<string>();
+
+            Debug.Log("<color=green>Attributes Loaded.</color>");
+        }
+
+        #region FOR PROOF OF CONCEPT
+        public void SaveUserName(string username)
+        {
+            this.UserName = username;
             this.SaveGame();
         }
 
-        public void SaveSeed(string seed)
+        public void SaveGame(string username, List<string> seeds)
         {
-            this.Seed = seed;
+            this.UserName = username;
+            this.Seeds = seeds;
             this.SaveGame();
         }
+        #endregion
 
+        /// <summary>
+        /// Functionality for saving the game.
+        /// </summary>
         public void SaveGame()
         {
             SaveLoadSystem.SavePlayerData(this);
-            Debug.Log($"Attributes saved.\nCurrency: {this.Currency} \nPlayerPos: {this.PlayerPos}");
+            Debug.Log($"Attributes saved. Username: {this.UserName}");
         }
     }
 }
