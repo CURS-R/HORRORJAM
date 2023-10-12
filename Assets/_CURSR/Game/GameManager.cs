@@ -27,53 +27,31 @@ namespace CURSR.Network
             // TODO: event unregisters
         }
 
-        private void StartGame(NetworkRunner runner)
+        private void StartGame()
         {
-            gameContainer.Game = 
-                runner.Spawn(
-                        prefab: gameContainer.GamePrefab, 
-                        position: Vector3.zero, 
-                        rotation: Quaternion.identity, 
-                        inputAuthority: runner.LocalPlayer)
-                    .GetComponent<Game>();
-            Log("LiveGame has been spawned.");
         }
 
         private void PlayerJoinGame(int id, PlayerRef playerRef)
         {
             //var newPlayer = gameContainer.Game.SpawnPlayer(id, playerRef);
         }
-        // TODO: Lucas pasted this from an earlier game
-        /*
-        private Player SpawnPlayer(int ownerID, PlayerRef inputAuth)
+        
+        private Game SpawnGame(NetworkRunner runner, int ownerID, PlayerRef inputAuth)
         {
-            if (GamePlayers.ContainsKey(ownerID))
+            var prefab = gameContainer.GamePrefab;
+            var newGame = runner.Spawn(prefab, inputAuthority: inputAuth, onBeforeSpawned: (runner, no) =>
             {
-                Log($"LiveGame SpawnPlayer() owner: {ownerID} but it already existed, returning that existing player.");
-                var existingPlayerGB = GamePlayers.Get(ownerID);
-                var existingNO = existingPlayerGB.gameObject.GetComponent<NetworkObject>();
-                existingNO.AssignInputAuthority(inputAuth);
-                Runner.SetPlayerObject(inputAuth, existingPlayerGB.GetBehaviour<NetworkObject>());
-                existingPlayerGB.Spawned();
-                return existingPlayerGB;
-            }
-            var prefab = gameContainer.playerGBPrefab;
-            var spawnPos = gameContainer.mapGSO.Config.playerspawnpoint.position;
-            var spawnRot = gameContainer.mapGSO.Config.playerspawnpoint.rotation;
-            var newPlayerGB = Runner.Spawn(prefab, position: spawnPos, rotation: spawnRot, inputAuthority: inputAuth, onBeforeSpawned: (runner, no) =>
-            {
-                var GB = no.GetBehaviour<PlayerGB>();
-                GB.Init(gameContainer.playerGSO.Config.Index, ownerID, true);
-                Runner.SetPlayerObject(inputAuth, GB.GetBehaviour<NetworkObject>());
+                var game = no.GetBehaviour<Game>();
+                // TODO: Init Game
+                // game.Init();
             });
-            GamePlayers.Set(ownerID, newPlayerGB);
-            return newPlayerGB;
+            Log("Game has been spawned.");
+            return newGame;
         }
-        */
 
         private void PlayerToggleLocalRepresentation(int id, bool on)
         {
-            if (gameContainer.Game.GamePlayers.TryGet(id, out var player))
+            if (gameContainer.Game.Players.TryGet(id, out var player))
                 player.ToggleLocalRepresentation(on);
         }
 

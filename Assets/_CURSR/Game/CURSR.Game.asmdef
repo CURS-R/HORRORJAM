@@ -3,6 +3,7 @@
     "rootNamespace": "CURSR.Game",
     "references": [
         "GUID:281592cc8441ec343875ac2568e3fe10",
+        "GUID:dfbacf9ddbcfe9240877590fbe5ecd23",
         "GUID:ecccf19c75e0e7848be755cb1da0b04c",
         "GUID:74c45ce8540de744aa4d11fdf83927d0",
         "GUID:539687d932dddbf4c915e3821e4f638d",

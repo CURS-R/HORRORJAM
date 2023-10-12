@@ -12,4 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4db99352cabb4e509ed15d21fc4982b2, type: 3}
   m_Name: GameContainer
   m_EditorClassIdentifier: 
+  <NetworkContainer>k__BackingField: {fileID: 11400000, guid: 59e25015b2a4e30438a986004bad8ecf, type: 2}
+  <SavesContainer>k__BackingField: {fileID: 11400000, guid: 0616c898f309e4c45a1e2f8605584c0a, type: 2}
+  <SettingsContainer>k__BackingField: {fileID: 11400000, guid: 1d5d4d22ea58e9649a63387ff373431f, type: 2}
+  <GamePrefab>k__BackingField: {fileID: 7934555035024105330, guid: 7dda8ae186795a64c84b590a12f8ef03, type: 3}
   <PlayerPrefab>k__BackingField: {fileID: 2846607235376064114, guid: 88c3d54b58ca192419347d12841b0ba4, type: 3}
