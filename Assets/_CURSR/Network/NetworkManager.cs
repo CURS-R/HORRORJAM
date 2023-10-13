@@ -35,7 +35,6 @@ namespace CURSR.Network
                 {
                     StartOrJoinRoom(GameMode.AutoHostOrClient);
                 }
-                // Party
                 if (GUI.Button(new Rect(420,0,200,40), "JoinSpecificRoom"))
                 {
                     throw new NotImplementedException();
@@ -59,7 +58,7 @@ namespace CURSR.Network
 
         public async void StartOrJoinRoom(GameMode mode)
         {
-            networkContainer.otherPlayerTokens = new();
+            networkContainer.OtherClientTokens = new();
 
             InstantiateRunner();
             
@@ -71,49 +70,49 @@ namespace CURSR.Network
                     ConnectionToken = networkContainer.localConnectionToken
                 }
             );
+            
             Debug.Log("StartOrJoinRoom finished.");
-        }
-
-        public void OpenRoom()
-        {
-            throw new NotImplementedException();
-        }
-        
-        public void CloseRoom()
-        {
-            throw new NotImplementedException();
         }
         
         public async void LeaveRoom()
         {
             await Runner.Shutdown();
             Runner = null;
+            
+            // TODO: better handling of this
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
         }
         
         #region Runner Callbacks
         public void OnPlayerJoined(NetworkRunner runner, PlayerRef playerRef)
         {
-            if (!isHost) return;
+            if (isHost)
+            {
+                byte[] token = runner.GetPlayerConnectionToken(playerRef) ?? networkContainer.localConnectionToken;
+                Log($"OnPlayerJoined fired, using token (hashed): {CTU.HashToken(token)}");
 
-            byte[] token = runner.GetPlayerConnectionToken(playerRef) ?? networkContainer.localConnectionToken;
-            Log($"OnPlayerJoin fired, using token (hashed): {CTU.HashToken(token)}");
+                if (!networkContainer.OtherClientTokens.Add(token))
+                    Log($"{CTU.HashToken(token)} was found in the HashSet. Attempting PlayerGB assignment.");
+                else
+                    Log($"No found value for token {CTU.HashToken(token)}.");
+            }
 
-            if (token == networkContainer.localConnectionToken)
-                networkContainer.InvokeCreateRoomEvent();
-
-            if (!networkContainer.otherPlayerTokens.Add(token))
-                Log($"{CTU.HashToken(token)} was found in the HashSet. Attempting PlayerGB assignment.");
-            else
-                Log($"No found value for token {CTU.HashToken(token)}.");
-    
-            networkContainer.InvokePlayerJoinRoomEvent(playerRef);
+            networkContainer.InvokePlayerJoinRoomEvent(runner, playerRef);
         }
         public void OnPlayerLeft(NetworkRunner runner, PlayerRef playerRef) {}
         public void OnInput(NetworkRunner runner, NetworkInput input) {}
         public void OnInputMissing(NetworkRunner runner, PlayerRef player, NetworkInput input) {}
         public void OnShutdown(NetworkRunner runner, ShutdownReason shutdownReason) { }
-        public void OnConnectedToServer(NetworkRunner runner) {}
+        // ReSharper disable once Unity.IncorrectMethodSignature
+        public void OnConnectedToServer(NetworkRunner runner)
+        {
+            if (isHost)
+            {
+                networkContainer.InvokeCreateRoomEvent(runner);
+            }
+
+            networkContainer.InvokeJoinRoomEvent(runner);
+        }
         public void OnDisconnectedFromServer(NetworkRunner runner) {}
         public void OnConnectRequest(NetworkRunner runner, NetworkRunnerCallbackArgs.ConnectRequest request, byte[] token) {}
         public void OnConnectFailed(NetworkRunner runner, NetAddress remoteAddress, NetConnectFailedReason reason) {}

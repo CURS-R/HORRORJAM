@@ -26,17 +26,23 @@ namespace CURSR.Network
                 _localConnectionToken = value;
             }
         }
-        public HashSet<byte[]> otherPlayerTokens;
+        
+        private HashSet<byte[]> _otherClientTokens;
+        public HashSet<byte[]> OtherClientTokens
+        {
+            get => _otherClientTokens;
+            set => _otherClientTokens = value;
+        }
 
-        public event Action CreateRoomEvent;
-        public void InvokeCreateRoomEvent() => CreateRoomEvent?.Invoke();
-        public event Action JoinRoomEvent;
-        public void InvokeJoinRoomEvent() => JoinRoomEvent?.Invoke();
+        public event Action<NetworkRunner> CreateRoomEvent;
+        public void InvokeCreateRoomEvent(NetworkRunner runner) => CreateRoomEvent?.Invoke(runner);
+        public event Action<NetworkRunner> JoinRoomEvent;
+        public void InvokeJoinRoomEvent(NetworkRunner runner) => JoinRoomEvent?.Invoke(runner);
 
-        public event Action<PlayerRef> PlayerJoinRoomEvent;
-        public void InvokePlayerJoinRoomEvent(PlayerRef playerRef) => PlayerJoinRoomEvent?.Invoke(playerRef);
-        public event Action<PlayerRef> PlayerLeaveRoomEvent;
-        public void InvokePlayerLeaveRoomEvent(PlayerRef playerRef) => PlayerLeaveRoomEvent?.Invoke(playerRef);
+        public event Action<NetworkRunner, PlayerRef> PlayerJoinRoomEvent;
+        public void InvokePlayerJoinRoomEvent(NetworkRunner runner, PlayerRef playerRef) => PlayerJoinRoomEvent?.Invoke(runner, playerRef);
+        public event Action<NetworkRunner, PlayerRef> PlayerLeaveRoomEvent;
+        public void InvokePlayerLeaveRoomEvent(NetworkRunner runner, PlayerRef playerRef) => PlayerLeaveRoomEvent?.Invoke(runner, playerRef);
 
         private void Log(string message) => Debug.Log(message, this);
     }
