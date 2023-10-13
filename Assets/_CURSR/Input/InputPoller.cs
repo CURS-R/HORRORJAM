@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace CURSR.Input
 {
-    public class InputPoller : MonoBehaviour
+    public class InputPoller
     {
         private readonly InputActions _inputActions;
         protected readonly SettingsContainer _settingsContainer;
