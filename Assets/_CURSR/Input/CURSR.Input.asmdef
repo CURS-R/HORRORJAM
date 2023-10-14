@@ -1,10 +1,11 @@
 {
-    "name": "CURSR.Display",
-    "rootNamespace": "CURSR.Display",
+    "name": "CURSR.Input",
+    "rootNamespace": "CURSR.Input",
     "references": [
-        "GUID:74c45ce8540de744aa4d11fdf83927d0",
         "GUID:a0208b1d2bc83cf44be2d39789881ba9",
-        "GUID:d28276d3b667e2b45acf90994c3edac2"
+        "GUID:d28276d3b667e2b45acf90994c3edac2",
+        "GUID:75469ad4d38634e559750d17036d5f7c",
+        "GUID:3ae5734e49d646442ad24f37762ebdd2"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

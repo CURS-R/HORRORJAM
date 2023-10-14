@@ -1,12 +1,7 @@
 {
-    "name": "CURSR.Game",
-    "rootNamespace": "CURSR.Game",
+    "name": "CURSR.Saves",
+    "rootNamespace": "CURSR.Saves",
     "references": [
-        "GUID:281592cc8441ec343875ac2568e3fe10",
-        "GUID:dfbacf9ddbcfe9240877590fbe5ecd23",
-        "GUID:ecccf19c75e0e7848be755cb1da0b04c",
-        "GUID:74c45ce8540de744aa4d11fdf83927d0",
-        "GUID:539687d932dddbf4c915e3821e4f638d",
         "GUID:a0208b1d2bc83cf44be2d39789881ba9",
         "GUID:d28276d3b667e2b45acf90994c3edac2"
     ],
