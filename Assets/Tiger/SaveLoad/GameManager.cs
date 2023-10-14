@@ -8,16 +8,18 @@ namespace CURSR
 {
     public class GameManager : Utils.Singleton<GameManager>
     {
-        public static GameManager Instance;
         public PlayerSaveAttributes PlayerAttributes;
         public PlayerData PlayerData;
 
         protected override void Init()
         {
             this.PlayerAttributes = GetComponent<PlayerSaveAttributes>();
-            this.LoadPlayerData();
 
-            this.PlayerAttributes.LoadAttributes();
+            this.LoadPlayerData();
+            if (this.PlayerData != null)
+            {
+                this.PlayerAttributes.LoadAttributes(ref this.PlayerData);
+            }
         }
 
         /// <summary>
@@ -25,10 +27,17 @@ namespace CURSR
         /// </summary>
         public void LoadPlayerData()
         {
-            this.PlayerData = SaveLoadSystem.LoadPlayerData();
-            if (PlayerData != null)
+            if (this.IsGameRunningOnWindows() || this.IsGameRunningInEditor())
             {
-                Debug.Log("<color=green>Player Data Loaded.</color>");
+                this.PlayerData = SaveLoadSystem.LoadPlayerData();
+                if (PlayerData != null)
+                {
+                    Debug.Log("<color=green>Player Data Loaded.</color>");
+                }
+            }
+            else if(this.IsGameRunningOnWeb())
+            {
+
             }
         }
 
@@ -38,7 +47,41 @@ namespace CURSR
         /// <returns></returns>
         public bool LoadExists()
         {
-            return SaveLoadSystem.LoadPlayerData() != null;
+            if (this.IsGameRunningOnWindows())
+            {
+                return SaveLoadSystem.LoadPlayerData() != null;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Return if game is running on windows.
+        /// </summary>
+        /// <returns></returns>
+        public bool IsGameRunningOnWindows()
+        {
+            return Application.platform == RuntimePlatform.WindowsPlayer;
+        }
+
+        /// <summary>
+        /// Return if game is running on Web.
+        /// </summary>
+        /// <returns></returns>
+        public bool IsGameRunningOnWeb()
+        {
+            return Application.platform == RuntimePlatform.WebGLPlayer;
+        }
+
+        /// <summary>
+        /// Returns if game is running in editor.
+        /// </summary>
+        /// <returns></returns>
+        public bool IsGameRunningInEditor()
+        {
+            return Application.isEditor;
         }
     }
 }

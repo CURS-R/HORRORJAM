@@ -18,6 +18,9 @@ namespace CURSR
 
             binaryFormater.Serialize(fileStream, playerData);
             fileStream.Close();
+
+            // Temporary
+            Debug.Log($"Game has been saved to filepath: {filePath}");
         }
 
         public static PlayerData LoadPlayerData()

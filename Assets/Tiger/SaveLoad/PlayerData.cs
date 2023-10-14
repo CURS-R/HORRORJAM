@@ -13,15 +13,13 @@ namespace CURSR
         // float
         // int[]
 
-        public int Currency;
-        public string Seed;
-        public float[] PlayerPos;
+        public string UserName;
+        public string[] Seeds;
 
         public PlayerData(PlayerSaveAttributes saveAttributes)
         {
-            this.Currency = saveAttributes.Currency;
-            this.Seed = saveAttributes.Seed;
-            this.PlayerPos = saveAttributes.PlayerPos;
+            this.UserName = saveAttributes.UserName;
+            this.Seeds = saveAttributes.Seeds.ToArray();
         }
     }
 }
