@@ -7,7 +7,7 @@ using CURSR.Saves;
 using CURSR.Settings;
 using CURSR.Utils;
 
-namespace CURSR.Network
+namespace CURSR.Game
 {
     public class GameManager : Singleton<GameManager>
     {

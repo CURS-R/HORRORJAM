@@ -10,7 +10,7 @@ using CURSR.Saves;
 using CURSR.Settings;
 using CURSR.Utils;
 
-namespace CURSR.Network
+namespace CURSR.Game
 {
     [CreateAssetMenu(fileName = "GameContainer", menuName = "CURSR/Container/Game")]
     public class GameContainer : ScriptableObject
