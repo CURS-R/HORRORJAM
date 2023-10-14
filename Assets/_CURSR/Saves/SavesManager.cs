@@ -9,9 +9,9 @@ namespace CURSR.Saves
 
         protected override void Init()
         {
-            savesContainer.PlayerData.Save();
-            savesContainer.PlayerData.Load();
-            var playerData = savesContainer.PlayerData;
+            savesContainer.PlayerSaveData.Save();
+            savesContainer.PlayerSaveData.Load();
+            var playerData = savesContainer.PlayerSaveData;
         }
     }
 }

@@ -9,8 +9,8 @@ namespace CURSR.Network
     {
         [field:SerializeField] private GameContainer gameContainer;
 
-        [Networked] 
-        public GameData Data { get; set; }
+        [Networked, UnitySerializeField] 
+        public ref GameData Data => ref MakeRef<GameData>();
         [Networked, Capacity(32), UnitySerializeField]
         public NetworkDictionary<PlayerRef, Player> Players { get; }
 
@@ -28,6 +28,7 @@ namespace CURSR.Network
         }
     }
 
+    [System.Serializable]
     public struct GameData : INetworkStruct
     {
         public GAMESTATE State;

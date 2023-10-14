@@ -13,6 +13,7 @@ namespace CURSR.Network
     [CreateAssetMenu(fileName = "MapContainer", menuName = "CURSR/Container/Map")]
     public class MapContainer : ScriptableObject
     {
+        // TODO: MapContainer
         /*
         [field: Header("Containers")]
         [field:SerializeField] public SettingsContainer SettingsContainer { get; private set; }
