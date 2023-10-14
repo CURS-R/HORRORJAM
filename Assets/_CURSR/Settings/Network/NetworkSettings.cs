@@ -9,8 +9,8 @@ namespace CURSR.Settings
     public class NetworkSettings : ScriptableObject
     {
         [field: SerializeField] public SceneReference MultiplayerScene { get; private set; }
-        [field: SerializeField] public GameMode GameMode { get; set; }
-        [field: SerializeField] public string SessionName { get; set; }
+        [field: SerializeField] public GameMode GameMode { get; set; } // TODO: modifying this with UI?
+        [field: SerializeField] public string SessionName { get; set; } // LATER: modifying this with UI
         public StartGameArgs GetStartArgs(byte[] connectionToken) => new StartGameArgs()
         {
             GameMode = GameMode,
