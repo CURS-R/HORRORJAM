@@ -12,11 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: da0a46cbe52d4d488bb7f97358496200, type: 3}
   m_Name: PlayerSettings
   m_EditorClassIdentifier: 
-  MovementSettings:
+  PlayerMovementSettings:
     <WalkSpeed>k__BackingField: 2
     <RunSpeed>k__BackingField: 4
     <JumpSpeed>k__BackingField: 5
     <FlySpeed>k__BackingField: 4
     <FastFlySpeed>k__BackingField: 8
-  ViewSettings:
+  PlayerViewSettings:
     <Sensitivity>k__BackingField: 10

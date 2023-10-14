@@ -12,6 +12,7 @@ namespace CURSR.Network
     public class GameManager : Singleton<GameManager>
     {
         [field:SerializeField] private GameContainer gameContainer;
+        [field:SerializeField] private NetworkContainer networkContainer;
         
         private bool isHost(NetworkRunner runner) => runner.IsSinglePlayer || runner.IsServer;
         
@@ -22,11 +23,8 @@ namespace CURSR.Network
 
         private void OnEnable()
         {
-            // TODO: subscribe to CreateRoomEvent for pre-game mechanics (lobby) 
-            gameContainer.NetworkContainer.JoinRoomEvent += SpawnOrGetGame;
-
-            // TODO: subscribe to PlayerLeaveRoomEvent to change game mechanics based on a player leaving (keep in mind rejoins)
-            gameContainer.NetworkContainer.PlayerJoinRoomEvent += SpawnOrGetPlayer;
+            networkContainer.LocalJoinRoomEvent += SpawnGame;
+            networkContainer.PlayerJoinRoomEvent += SpawnPlayer;
         }
         
         private void OnDisable()
@@ -34,59 +32,52 @@ namespace CURSR.Network
             // TODO: event unregisters
         }
         
-        private void SpawnOrGetGame(NetworkRunner runner)
+        private void SpawnGame(NetworkRunner runner)
         {
-            if (isHost(runner))
-            {
-                var prefab = gameContainer.GamePrefab;
-                var newGame = runner.Spawn(
-                    prefab:prefab, 
-                    onBeforeSpawned:(runner, no) =>
+            if (!isHost(runner)) return;
+            
+            var prefab = gameContainer.GamePrefab;
+            var newGame = runner.Spawn(
+                prefab:prefab, 
+                onBeforeSpawned:(runner, no) =>
                 {
                     var game = no.GetBehaviour<Game>();
-                    game.Init(gameContainer);
                 });
-                Log("Game has been spawned.");
-            }
-
-            gameContainer.Game = FindObjectOfType<Game>();
-            Log("Game has been gotten.");
+            Log("Game has been spawned.");
         }
 
-        private void SpawnOrGetPlayer(NetworkRunner runner, PlayerRef playerRef)
+        private void SpawnPlayer(NetworkRunner runner, PlayerRef playerRef)
         {
-            if (isHost(runner))
+            if (!isHost(runner)) return;
+
+            // Spawning or handling rejoin of the player object
+            if (gameContainer.Game.Players.TryGet(playerRef, out var player))
             {
-                var prefab = gameContainer.PlayerPrefab;
-                var newPlayer = runner.Spawn(
-                    prefab:prefab, 
-                    inputAuthority:playerRef, 
-                    onBeforeSpawned:(runner, no) =>
-                {
-                    var player = no.GetBehaviour<Player>();
-                    player.Init(gameContainer.SettingsContainer);
-                });
-                Log("Player has been spawned.");
+                Debug.Log($"(gameContainer.Game.Players.TryGet({playerRef.PlayerId}), found, returning that existing player.");
+                player.gameObject.GetComponent<NetworkObject>().AssignInputAuthority(playerRef);
+                player.Spawned();
             }
-
-            // TODO: getting new player locally?
-            Log("Player has been gotten.");
-        }
-
-        private void PlayerToggleLocalRepresentation(int id, bool on)
-        {
-            if (gameContainer.Game.Players.TryGet(id, out var player))
-                player.ToggleLocalRepresentation(on);
+            else
+            {
+                // TODO: spawnpoints and rotations
+                var spawnPos = Vector3.zero;
+                var spawnRot = Quaternion.identity;
+                player = runner.Spawn(
+                    prefab:gameContainer.PlayerPrefab, 
+                    inputAuthority:playerRef,
+                    position: spawnPos,
+                    rotation: spawnRot,
+                    onBeforeSpawned:(runner, no) =>
+                    {
+                        var player = no.GetBehaviour<Player>();
+                        gameContainer.Game.Players.Add(playerRef, player);
+                    });
+                Log("We spawned a new player.");
+            }
+            runner.SetPlayerObject(playerRef, player.GetBehaviour<NetworkObject>());
+            gameContainer.Game.Players.Set(playerRef, player);
         }
         
         private void Log(string message) => Debug.Log(message, this);
-    }
-
-    public enum GAMESTATE
-    {
-        INIT,
-        LOBBY,
-        PLAYING,
-        OVER,
     }
 }

@@ -10,21 +10,22 @@ namespace CURSR.Game
     public class PlayerCharacterController : InputPoller
     {
         // Constructor
-        public PlayerCharacterController(SettingsContainer settingsContainer, CharacterController characterController) : base(settingsContainer)
+        public PlayerCharacterController(CharacterController characterController, PlayerMovementSettings playerMovementSettings)
         {
             _characterController = characterController;
+            _playerMovementSettings = playerMovementSettings;
         }
+        private readonly CharacterController _characterController;
+        private readonly PlayerMovementSettings _playerMovementSettings;
+        private Transform _forwardTransform => _characterController.transform;
         
         // Consts
         private const float gravity = -18f;
 
+        // Internal
         private Vector3 fallingVelocity = Vector3.zero;
         private float lerpValueForWalkingAndFlying = 0f;
         private bool isFlying;
-
-        private readonly CharacterController _characterController;
-        private Transform _forwardTransform => _characterController.transform;
-        private PlayerMovementSettings _playerMovementSettings => _settingsContainer.PlayerSettings.MovementSettings;
 
         public void ProcessMove(float deltaTime)
         {

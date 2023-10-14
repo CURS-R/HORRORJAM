@@ -712,7 +712,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _interpolationDataSource: 0
-  <Config>k__BackingField: {fileID: 11400000, guid: 01e718f8c10370648bf9df03b27c083b, type: 2}
+  gameContainer: {fileID: 11400000, guid: 4c0c23c9a6d3a95458482721097c6d25, type: 2}
+  settingsContainer: {fileID: 11400000, guid: 1d5d4d22ea58e9649a63387ff373431f, type: 2}
   <localCC>k__BackingField: {fileID: 2846607235376064115}
   <localViewTransform>k__BackingField: {fileID: 2846607234717674145}
 --- !u!114 &2846607235376064077

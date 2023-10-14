@@ -9,12 +9,10 @@ namespace CURSR.Input
     public class InputPoller
     {
         private readonly InputActions _inputActions;
-        protected readonly SettingsContainer _settingsContainer;
 
         // Constructor
-        public InputPoller(SettingsContainer settingsContainer)
+        protected InputPoller()
         {
-            _settingsContainer = settingsContainer;
             _inputActions = new();
             Disable();
         }

@@ -46,6 +46,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _interpolationDataSource: 0
+  gameContainer: {fileID: 11400000, guid: 4c0c23c9a6d3a95458482721097c6d25, type: 2}
   _Players:
     _items: []
 --- !u!114 &7775013094311411575

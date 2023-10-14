@@ -1,78 +1,82 @@
 ﻿using System;
 using System.Collections.Generic;
+using CURSR.Network;
 using Fusion;
 using UnityEngine;
 using CURSR.Settings;
+using Fusion.Sockets;
 
 namespace CURSR.Game
 {
-    public class Player : NetworkBehaviour
+    public class Player : NetworkBehaviour, INetworkRunnerCallbacks
     {
-        public void Init(SettingsContainer settingsContainer)
-        {
-            _settingsContainer = settingsContainer;
-        }
-        private SettingsContainer _settingsContainer;
+        [field:SerializeField] private GameContainer gameContainer;
+        [field:SerializeField] private SettingsContainer settingsContainer;
+        [field:Header("Unity components")]
+        [field:SerializeField] private CharacterController localCC { get; set; }
+        [field:SerializeField] private Transform localViewTransform { get; set; }
         
         // Networked
-        [Networked] public ref PlayerData PlayerData => ref MakeRef<PlayerData>();
-        
-        [field:SerializeField] public CharacterController localCC { get; private set; }
-        [field:SerializeField] public Transform localViewTransform { get; private set; }
-        
-        private PlayerSettings _playerSettings => _settingsContainer.PlayerSettings;
-        private PlayerCharacterController _playerCharacterController;
-        private PlayerViewController _playerViewController;
+        [Networked] private ref PlayerData PlayerData => ref MakeRef<PlayerData>();
+
+        private PlayerCharacterController playerCharacterController;
+        private PlayerViewController playerViewController;
 
         public override void Spawned()
         {
-            // TODO: Refactor this?
-            _playerCharacterController ??= new (_settingsContainer, localCC);
-            _playerViewController ??= new (_settingsContainer, localViewTransform);
-            ToggleLocalRepresentation(HasInputAuthority);
+            playerCharacterController ??= new(localCC, settingsContainer.PlayerSettings.PlayerMovementSettings);
+            playerViewController ??= new(localViewTransform, settingsContainer.PlayerSettings.PlayerViewSettings);
+            ToggleControllersBasedOnAuthority();
+            
+            Runner.AddCallbacks(this);
+            
             base.Spawned();
         }
         
-        /// <summary>
-        /// This can cause de-sync if used improperly.
-        /// </summary>
-        public void ToggleLocalRepresentation(bool on)
+        public void OnDisable()
         {
-            if (on)
+            if(Runner != null)
+            {
+                Runner.RemoveCallbacks(this);
+            }
+        }
+        
+        public void ToggleControllersBasedOnAuthority()
+        {
+            if (HasInputAuthority)
             {
                 localCC.enabled = true;
-                _playerCharacterController.Enable();
-                _playerViewController.Enable();
+                playerCharacterController.Enable();
+                playerViewController.Enable();
             }
             else
             {
                 localCC.enabled = false;
-                _playerCharacterController.Disable();
-                _playerViewController.Disable();
+                playerCharacterController.Disable();
+                playerViewController.Disable();
             }
         }
 
         public void OnInput(NetworkRunner runner, NetworkInput input)
         {
-            if (!HasInputAuthority)
-                return;
-            var outgoing = new PlayerSyncStruct{
-                ccPosition = localCC.transform.position,
-                ccRotation = localCC.transform.rotation,
-                viewRotation = localViewTransform.rotation,
-            };
-            input.Set(outgoing);
+            if (HasInputAuthority)
+            {
+                var outgoing = new PlayerInputStruct{
+                    ccPosition = localCC.transform.position,
+                    ccRotation = localCC.transform.rotation,
+                    viewRotation = localViewTransform.rotation,
+                };
+                input.Set(outgoing);
+            }
         }
         
         public override void FixedUpdateNetwork()
         {
-            if (!HasStateAuthority)
-                return;
-            if (GetInput(out PlayerSyncStruct incoming))
+            if (GetInput(out PlayerInputStruct incoming))
             {
-                PlayerData.networkedCCPosition = incoming.ccPosition;
-                PlayerData.networkedCCRotation = incoming.ccRotation;
-                PlayerData.networkedViewPoint = incoming.viewRotation;
+                PlayerData.CCPosition = incoming.ccPosition;
+                PlayerData.CCRotation = incoming.ccRotation;
+                PlayerData.viewPoint = incoming.viewRotation;
             }
         }
 
@@ -80,28 +84,50 @@ namespace CURSR.Game
         {
             if (HasInputAuthority)
             {
-                if (Cursor.lockState == CursorLockMode.Locked)
-                {
-                    _playerViewController.Process();
-                    _playerCharacterController.ProcessRotate(_playerViewController.GetPitch(), Time.deltaTime);
-                }
-                _playerCharacterController.ProcessMove(Time.deltaTime);
+                //if (Cursor.lockState != CursorLockMode.Locked)
+                //{
+                    playerViewController.Process();
+                    playerCharacterController.ProcessRotate(playerViewController.GetPitch(), Time.deltaTime);
+                //}
+                playerCharacterController.ProcessMove(Time.deltaTime);
+            }
+            else
+            {
+                localCC.transform.position = PlayerData.CCPosition;
+                localCC.transform.rotation = PlayerData.CCRotation;
+                localViewTransform.rotation = PlayerData.viewPoint;
             }
         }
+
+        public void OnPlayerJoined(NetworkRunner runner, PlayerRef player){}
+        public void OnPlayerLeft(NetworkRunner runner, PlayerRef player){}
+        public void OnInputMissing(NetworkRunner runner, PlayerRef player, NetworkInput input){}
+        public void OnShutdown(NetworkRunner runner, ShutdownReason shutdownReason){}
+        public void OnConnectedToServer(NetworkRunner runner){}
+        public void OnDisconnectedFromServer(NetworkRunner runner){}
+        public void OnConnectRequest(NetworkRunner runner, NetworkRunnerCallbackArgs.ConnectRequest request, byte[] token){}
+        public void OnConnectFailed(NetworkRunner runner, NetAddress remoteAddress, NetConnectFailedReason reason){}
+        public void OnUserSimulationMessage(NetworkRunner runner, SimulationMessagePtr message){}
+        public void OnSessionListUpdated(NetworkRunner runner, List<SessionInfo> sessionList){}
+        public void OnCustomAuthenticationResponse(NetworkRunner runner, Dictionary<string, object> data){}
+        public void OnHostMigration(NetworkRunner runner, HostMigrationToken hostMigrationToken){}
+        public void OnReliableDataReceived(NetworkRunner runner, PlayerRef player, ArraySegment<byte> data){}
+        public void OnSceneLoadDone(NetworkRunner runner){}
+        public void OnSceneLoadStart(NetworkRunner runner){}
     }
     
+    [System.Serializable]
     public struct PlayerData : INetworkStruct
     {
         public int ownerID { get; set; }
-        public Vector2Int index { get; set; }
+        // TODO: more networked playerdata
         // Visual/Movement
-        public Vector3 networkedCCPosition { get; set; }
-        public Quaternion networkedCCRotation { get; set; }
-        public Quaternion networkedViewPoint { get; set; }
+        public Vector3 CCPosition { get; set; }
+        public Quaternion CCRotation { get; set; }
+        public Quaternion viewPoint { get; set; }
     }
 
-    // TODO: i think this should be changed ? it's weird
-    public struct PlayerSyncStruct : INetworkInput
+    public struct PlayerInputStruct : INetworkInput
     {
         public Vector3 ccPosition { get; set; }
         public Quaternion ccRotation { get; set; }

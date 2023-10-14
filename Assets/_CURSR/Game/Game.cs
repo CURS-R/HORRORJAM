@@ -7,51 +7,37 @@ namespace CURSR.Network
 {
     public class Game : NetworkBehaviour
     {
-        private GameContainer _gameContainer;
-        
-        public void Init(GameContainer gameContainer)
-        {
-            _gameContainer = gameContainer;
-        }
-        
+        [field:SerializeField] private GameContainer gameContainer;
+
+        [Networked] 
+        public GameData Data { get; set; }
         [Networked, Capacity(32), UnitySerializeField]
-        public NetworkDictionary<int, Player> Players { get; }
+        public NetworkDictionary<PlayerRef, Player> Players { get; }
 
         public override void Spawned()
         {
-            base.Spawned();
+            if (gameContainer.Game == null)
+                gameContainer.Game = this;
+            else
+                Debug.Log("Game in gameContainer wasn't null? There's a large problem unfolding.");
         }
 
         private void FixedUpdate()
         {
             
         }
-        
-        private Player SpawnPlayer(int ownerID, PlayerRef inputAuth)
-        {
-            if (Players.ContainsKey(ownerID))
-            {
-                Debug.Log($"Game's SpawnPlayer() owner: {ownerID} but it already existed, returning that existing player.");
-                var existingPlayer = Players.Get(ownerID);
-                var existingNO = existingPlayer.gameObject.GetComponent<NetworkObject>();
-                existingNO.AssignInputAuthority(inputAuth);
-                Runner.SetPlayerObject(inputAuth, existingPlayer.GetBehaviour<NetworkObject>());
-                existingPlayer.Spawned();
-                return existingPlayer;
-            }
-            var prefab = _gameContainer.PlayerPrefab;
-            // TODO: spawnpoints and rotations
-            var spawnPos = Vector3.zero;
-            var spawnRot = Quaternion.identity;
-            var newPlayer = Runner.Spawn(prefab, position: spawnPos, rotation: spawnRot, inputAuthority: inputAuth, onBeforeSpawned: (runner, no) =>
-            {
-                var player = no.GetBehaviour<Player>();
-                // TODO: Init Player
-                //player.Init();
-                Runner.SetPlayerObject(inputAuth, player.GetBehaviour<NetworkObject>());
-            });
-            Players.Set(ownerID, newPlayer);
-            return newPlayer;
-        }
+    }
+
+    public struct GameData : INetworkStruct
+    {
+        public GAMESTATE State;
+    }
+    
+    public enum GAMESTATE
+    {
+        INIT,
+        LOBBY,
+        PLAYING,
+        OVER,
     }
 }

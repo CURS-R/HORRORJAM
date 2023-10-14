@@ -657,6 +657,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   gameContainer: {fileID: 11400000, guid: 4c0c23c9a6d3a95458482721097c6d25, type: 2}
+  networkContainer: {fileID: 11400000, guid: 59e25015b2a4e30438a986004bad8ecf, type: 2}
 --- !u!1 &1781670469
 GameObject:
   m_ObjectHideFlags: 0

@@ -13,7 +13,7 @@ namespace CURSR.Network
     /// <summary>
     /// The "guy" for networking.
     /// </summary>
-    public class NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
+    public class NetworkManager : Singleton<NetworkManager>, INetworkRunnerCallbacks
     {
         [field:SerializeField] private NetworkContainer networkContainer;
         
@@ -49,8 +49,8 @@ namespace CURSR.Network
             }
         }
         #endregion
-        
-        protected void Awake()
+
+        protected override void Init()
         {
             // TODO: get connection token elsewhere?
             networkContainer.localConnectionToken = CTU.NewToken(true);
@@ -58,7 +58,7 @@ namespace CURSR.Network
 
         public async void StartOrJoinRoom(GameMode mode)
         {
-            networkContainer.OtherClientTokens = new();
+            networkContainer.ConnectionTokens = new();
 
             InstantiateRunner();
             
@@ -91,28 +91,22 @@ namespace CURSR.Network
                 byte[] token = runner.GetPlayerConnectionToken(playerRef) ?? networkContainer.localConnectionToken;
                 Log($"OnPlayerJoined fired, using token (hashed): {CTU.HashToken(token)}");
 
-                if (!networkContainer.OtherClientTokens.Add(token))
+                if (!networkContainer.ConnectionTokens.Add(token))
                     Log($"{CTU.HashToken(token)} was found in the HashSet. Attempting PlayerGB assignment.");
                 else
                     Log($"No found value for token {CTU.HashToken(token)}.");
             }
 
+            if (runner.LocalPlayer == playerRef)
+                networkContainer.InvokeLocalJoinRoomEvent(runner);
             networkContainer.InvokePlayerJoinRoomEvent(runner, playerRef);
         }
         public void OnPlayerLeft(NetworkRunner runner, PlayerRef playerRef) {}
-        public void OnInput(NetworkRunner runner, NetworkInput input) {}
+        public void OnInput(NetworkRunner runner, NetworkInput input) { }
         public void OnInputMissing(NetworkRunner runner, PlayerRef player, NetworkInput input) {}
         public void OnShutdown(NetworkRunner runner, ShutdownReason shutdownReason) { }
         // ReSharper disable once Unity.IncorrectMethodSignature
-        public void OnConnectedToServer(NetworkRunner runner)
-        {
-            if (isHost)
-            {
-                networkContainer.InvokeCreateRoomEvent(runner);
-            }
-
-            networkContainer.InvokeJoinRoomEvent(runner);
-        }
+        public void OnConnectedToServer(NetworkRunner runner) { }
         public void OnDisconnectedFromServer(NetworkRunner runner) {}
         public void OnConnectRequest(NetworkRunner runner, NetworkRunnerCallbackArgs.ConnectRequest request, byte[] token) {}
         public void OnConnectFailed(NetworkRunner runner, NetAddress remoteAddress, NetConnectFailedReason reason) {}

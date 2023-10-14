@@ -1,12 +1,13 @@
 ﻿using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace CURSR.Settings
 {
     [CreateAssetMenu(fileName = "PlayerSettings", menuName = "CURSR/Settings/Player")]
     public class PlayerSettings : ScriptableObject
     {
-        public PlayerMovementSettings MovementSettings;
-        public PlayerViewSettings ViewSettings;
+        public PlayerMovementSettings PlayerMovementSettings;
+        public PlayerViewSettings PlayerViewSettings;
     }
     
     [System.Serializable]
