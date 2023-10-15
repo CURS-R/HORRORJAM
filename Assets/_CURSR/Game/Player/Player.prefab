@@ -716,6 +716,9 @@ MonoBehaviour:
   settingsContainer: {fileID: 11400000, guid: 1d5d4d22ea58e9649a63387ff373431f, type: 2}
   <localCC>k__BackingField: {fileID: 2846607235376064115}
   <localViewTransform>k__BackingField: {fileID: 2846607234717674145}
+  <layerMaskForLocalPlayer>k__BackingField:
+    serializedVersion: 2
+    m_Bits: 64
 --- !u!114 &2846607235376064077
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -4,6 +4,7 @@ using CURSR.Network;
 using Fusion;
 using UnityEngine;
 using CURSR.Settings;
+using CURSR.Utils;
 using Fusion.Sockets;
 
 namespace CURSR.Game
@@ -13,14 +14,22 @@ namespace CURSR.Game
         [field:SerializeField] private GameContainer gameContainer;
         [field:SerializeField] private SettingsContainer settingsContainer;
         [field:Header("Unity components")]
-        [field:SerializeField] private CharacterController localCC { get; set; }
-        [field:SerializeField] private Transform localViewTransform { get; set; }
+        [field:SerializeField] public CharacterController localCC { get; private set; }
+        [field:SerializeField] public Transform localViewTransform { get; private set; }
+        [field:SerializeField] public LayerMask layerMaskForLocalPlayer { get; private set; }
         
         // Networked
         [Networked] private ref PlayerData PlayerData => ref MakeRef<PlayerData>();
 
         private PlayerCharacterController playerCharacterController;
         private PlayerViewController playerViewController;
+
+        private LayerMask initialLayerMask;
+
+        private void Awake()
+        {
+            initialLayerMask = 1 << this.gameObject.layer;
+        }
 
         public override void Spawned()
         {
@@ -29,6 +38,11 @@ namespace CURSR.Game
             ToggleControllersBasedOnAuthority();
             
             Runner.AddCallbacks(this);
+
+            if (HasInputAuthority)
+                gameContainer.InvokeLocalPlayerSpawnedEvent(this);
+            else
+                gameContainer.InvokeOtherPlayerSpawnedEvent(this);
             
             base.Spawned();
         }
@@ -48,12 +62,14 @@ namespace CURSR.Game
                 localCC.enabled = true;
                 playerCharacterController.Enable();
                 playerViewController.Enable();
+                GameObjectUtil.ChangeLayerRecursively(this.transform, layerMaskForLocalPlayer);
             }
             else
             {
                 localCC.enabled = false;
                 playerCharacterController.Disable();
                 playerViewController.Disable();
+                GameObjectUtil.ChangeLayerRecursively(this.transform, initialLayerMask);
             }
         }
 
