@@ -1,7 +1,8 @@
 {
-    "name": "CURSR.Game",
-    "rootNamespace": "CURSR.Game",
+    "name": "CURSR.Visual",
+    "rootNamespace": "CURSR.Visual",
     "references": [
+        "GUID:586b31e934e955c4dad989e42bed1c33",
         "GUID:281592cc8441ec343875ac2568e3fe10",
         "GUID:dfbacf9ddbcfe9240877590fbe5ecd23",
         "GUID:ecccf19c75e0e7848be755cb1da0b04c",
