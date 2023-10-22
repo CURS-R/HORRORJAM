@@ -19,8 +19,24 @@ namespace CURSR.Game
         [field:SerializeField] public LayerMask layerMaskForLocalPlayer { get; private set; }
         
         // Networked
-        [Networked] private ref PlayerData PlayerData => ref MakeRef<PlayerData>();
+        [Networked] public ref PlayerData PlayerData => ref MakeRef<PlayerData>();
+        
+        [Networked, Capacity(32), UnitySerializeField]
+        public NetworkLinkedList<int> Inventory { get; }
 
+        public List<ItemSO> Items
+        {
+            get
+            {
+                List<ItemSO> returnItems = new();
+                foreach (var itemIndex in Inventory)
+                {
+                    returnItems.Add(gameContainer.ItemsRegistry.Items[itemIndex]);
+                }
+                return returnItems;
+            }
+        }
+        
         private PlayerCharacterController playerCharacterController;
         private PlayerViewController playerViewController;
 
@@ -75,15 +91,15 @@ namespace CURSR.Game
 
         public void OnInput(NetworkRunner runner, NetworkInput input)
         {
-            if (HasInputAuthority)
-            {
-                var outgoing = new PlayerInputStruct{
-                    ccPosition = localCC.transform.position,
-                    ccRotation = localCC.transform.rotation,
-                    viewRotation = localViewTransform.rotation,
-                };
-                input.Set(outgoing);
-            }
+            if (!HasInputAuthority) return;
+            
+            var outgoing = new PlayerInputStruct{
+                ccPosition = localCC.transform.position,
+                ccRotation = localCC.transform.rotation,
+                viewRotation = localViewTransform.rotation,
+            };
+            
+            input.Set(outgoing);
         }
         
         public override void FixedUpdateNetwork()
@@ -100,6 +116,7 @@ namespace CURSR.Game
         {
             if (HasInputAuthority)
             {
+                // TODO: Cursor Lockstate
                 //if (Cursor.lockState != CursorLockMode.Locked)
                 //{
                     playerViewController.Process();
@@ -135,8 +152,6 @@ namespace CURSR.Game
     [System.Serializable]
     public struct PlayerData : INetworkStruct
     {
-        public int ownerID { get; set; }
-        // TODO: more networked playerdata
         // Visual/Movement
         public Vector3 CCPosition { get; set; }
         public Quaternion CCRotation { get; set; }

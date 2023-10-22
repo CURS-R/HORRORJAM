@@ -14,4 +14,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   <GamePrefab>k__BackingField: {fileID: 7934555035024105330, guid: 7dda8ae186795a64c84b590a12f8ef03, type: 3}
   <PlayerPrefab>k__BackingField: {fileID: 2846607235376064114, guid: 88c3d54b58ca192419347d12841b0ba4, type: 3}
+  <ItemPrefab>k__BackingField: {fileID: 8776807164656955814, guid: ddb6b71f9b10665438c8366bb59a530b, type: 3}
+  <ItemsRegistry>k__BackingField: {fileID: 11400000, guid: 67d5eccfe0bb6934893d54f76993f00e, type: 2}
   Game: {fileID: 0}

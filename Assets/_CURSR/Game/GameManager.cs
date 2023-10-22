@@ -44,6 +44,8 @@ namespace CURSR.Game
                     var game = no.GetBehaviour<Game>();
                 });
             Log("Game has been spawned.");
+            
+            SpawnItem(runner, 0);
         }
 
         private void SpawnPlayer(NetworkRunner runner, PlayerRef playerRef)
@@ -76,6 +78,25 @@ namespace CURSR.Game
             }
             runner.SetPlayerObject(playerRef, player.GetBehaviour<NetworkObject>());
             gameContainer.Game.Players.Set(playerRef, player);
+        }
+
+        private void SpawnItem(NetworkRunner runner, int itemIndex)
+        {
+            if (!isHost(runner)) return;
+
+            // TODO: spawnpoints and rotations
+            var spawnPos = new Vector3(0,10,0);
+            var spawnRot = Quaternion.Euler(10,10,10);
+            var item = runner.Spawn(
+                prefab: gameContainer.ItemPrefab,
+                position: spawnPos,
+                rotation: spawnRot,
+                onBeforeSpawned:(runner, no) =>
+                {
+                    var item = no.GetBehaviour<Item>();
+                    item.Index = itemIndex;
+                });
+            Log("We spawned a new item.");
         }
         
         private void Log(string message) => Debug.Log(message, this);
