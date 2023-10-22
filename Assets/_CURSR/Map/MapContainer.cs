@@ -8,7 +8,7 @@ using CURSR.Saves;
 using CURSR.Settings;
 using CURSR.Utils;
 
-namespace CURSR.Network
+namespace CURSR.Map
 {
     [CreateAssetMenu(fileName = "MapContainer", menuName = "CURSR/Container/Map")]
     public class MapContainer : ScriptableObject

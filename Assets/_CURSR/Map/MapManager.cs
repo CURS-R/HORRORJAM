@@ -5,7 +5,7 @@ using CURSR.Saves;
 using CURSR.Settings;
 using CURSR.Utils;
 
-namespace CURSR.Network
+namespace CURSR.Map
 {
     public class MapManager : Singleton<MapManager>
     {
