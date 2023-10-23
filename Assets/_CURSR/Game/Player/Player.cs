@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using CURSR.Network;
 using Fusion;
 using UnityEngine;
@@ -18,28 +19,22 @@ namespace CURSR.Game
         [field:SerializeField] public Transform localViewTransform { get; private set; }
         [field:SerializeField] public LayerMask layerMaskForLocalPlayer { get; private set; }
         
-        // Networked
-        [Networked] public ref PlayerData PlayerData => ref MakeRef<PlayerData>();
+        [Networked]
+        [HideInInspector] public ref PlayerData PlayerData => ref MakeRef<PlayerData>();
         
         [Networked, Capacity(32), UnitySerializeField]
-        public NetworkLinkedList<int> Inventory { get; }
-
-        public List<ItemSO> Items
-        {
-            get
-            {
-                List<ItemSO> returnItems = new();
-                foreach (var itemIndex in Inventory)
-                {
-                    returnItems.Add(gameContainer.ItemsRegistry.Items[itemIndex]);
-                }
-                return returnItems;
-            }
-        }
+        [HideInInspector] public NetworkLinkedList<int> Inventory { get; }
+        [HideInInspector] public List<ItemSO> Items => Inventory.Select(itemIndex => gameContainer.ItemsRegistry.Items[itemIndex]).ToList();
+        private int selectedItem;
         
+        public event Action<int> ChangeItemSelection;
+        public void InvokeChangeItemSelection(int itemSelection) => ChangeItemSelection?.Invoke(itemSelection);
+
         private PlayerCharacterController playerCharacterController;
         private PlayerViewController playerViewController;
-
+        private PlayerInteractionController playerInteractionController;
+        private PlayerInventoryController playerInventoryController;
+        
         private LayerMask initialLayerMask;
 
         private void Awake()
@@ -49,9 +44,7 @@ namespace CURSR.Game
 
         public override void Spawned()
         {
-            playerCharacterController ??= new(localCC, settingsContainer.PlayerSettings.PlayerMovementSettings);
-            playerViewController ??= new(localViewTransform, settingsContainer.PlayerSettings.PlayerViewSettings);
-            ToggleControllersBasedOnAuthority();
+            SetupControllers();
             
             Runner.AddCallbacks(this);
 
@@ -70,14 +63,20 @@ namespace CURSR.Game
                 Runner.RemoveCallbacks(this);
             }
         }
-        
-        public void ToggleControllersBasedOnAuthority()
+
+        private void SetupControllers()
         {
+            playerCharacterController ??= new(settingsContainer.PlayerSettings.PlayerMovementSettings, localCC);
+            playerViewController ??= new(settingsContainer.PlayerSettings.PlayerViewSettings, localViewTransform);
+            playerInteractionController ??= new(settingsContainer.PlayerSettings.PlayerInteractionSettings, localViewTransform);
+            playerInventoryController ??= new();
             if (HasInputAuthority)
             {
                 localCC.enabled = true;
                 playerCharacterController.Enable();
                 playerViewController.Enable();
+                playerInteractionController.Enable();
+                playerInventoryController.Enable();
                 GameObjectUtil.ChangeLayerRecursively(this.transform, layerMaskForLocalPlayer);
             }
             else
@@ -85,6 +84,8 @@ namespace CURSR.Game
                 localCC.enabled = false;
                 playerCharacterController.Disable();
                 playerViewController.Disable();
+                playerInteractionController.Enable();
+                playerInventoryController.Enable();
                 GameObjectUtil.ChangeLayerRecursively(this.transform, initialLayerMask);
             }
         }
@@ -123,6 +124,8 @@ namespace CURSR.Game
                     playerCharacterController.ProcessRotate(playerViewController.GetPitch(), Time.deltaTime);
                 //}
                 playerCharacterController.ProcessMove(Time.deltaTime);
+                playerInteractionController.Process(Time.deltaTime);
+                playerInventoryController.Process(Time.deltaTime);
             }
             else
             {

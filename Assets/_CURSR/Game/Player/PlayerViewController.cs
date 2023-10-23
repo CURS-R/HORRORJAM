@@ -8,13 +8,13 @@ namespace CURSR.Game
 {
     public class PlayerViewController : InputPoller
     {
-        public PlayerViewController(Transform viewTransform, PlayerViewSettings playerViewSettings)
+        public PlayerViewController(PlayerViewSettings settings, Transform viewTransform)
         {
+            _settings = settings;
             _viewTransform = viewTransform;
-            _playerViewSettings = playerViewSettings;
         }
+        private readonly PlayerViewSettings _settings; // TODO: sensitivity setting
         private readonly Transform _viewTransform;
-        private readonly PlayerViewSettings _playerViewSettings; // TODO: sensitivity setting
         
         // Externals
         private Angle yaw;

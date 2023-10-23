@@ -17,16 +17,13 @@ namespace CURSR.Game
         public void Process(float deltaTime)
         {
             var input = PollInput();
-            
-            Debug.Log("Hello.");
 
-            if (input.LeftClickHold)
+            if (input.LeftClick)
             {
-                Debug.Log("Left clicked.");
-                // TODO: interact with object in front of them
                 if (DrawRayForItem(out var item))
                 {
                     Debug.Log("Hit item.");
+                    // TODO: interact with item
                 }
             }
             if (input.RightClick)

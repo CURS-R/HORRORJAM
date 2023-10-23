@@ -13,13 +13,12 @@ namespace CURSR.Game
     {
         [field:SerializeField] private GameContainer gameContainer;
         [field:SerializeField] private NetworkContainer networkContainer;
-        
-        private bool isHost(NetworkRunner runner) => runner.IsSinglePlayer || runner.IsServer;
-        
         protected override void Init()
         {
             
         }
+        
+        private bool isHost(NetworkRunner runner) => runner.IsSinglePlayer || runner.IsServer;
 
         private void OnEnable()
         {
@@ -29,7 +28,7 @@ namespace CURSR.Game
         
         private void OnDisable()
         {
-            // TODO: event unregisters
+            // LATER: event unregisters
         }
         
         private void SpawnGame(NetworkRunner runner)
