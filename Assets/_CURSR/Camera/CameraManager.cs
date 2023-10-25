@@ -26,7 +26,6 @@ namespace CURSR.Camera
         }
         private void OnDisable()
         {
-            // TODO: event unregisters
         }
         
         private void LockOnToPlayer(Player player)
