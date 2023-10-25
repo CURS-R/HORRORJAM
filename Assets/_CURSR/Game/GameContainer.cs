@@ -21,7 +21,7 @@ namespace CURSR.Game
         [field:SerializeField] public Player PlayerPrefab { get; private set; }
         [field:SerializeField] public Item ItemPrefab { get; private set; }
         [field: Header("Registries")]
-        [field:SerializeField] public ItemsRegistry ItemsRegistry { get; private set; }
+        [field:SerializeField] public ItemSOsRegistry ItemSOsRegistry { get; private set; }
 
         [HideInInspector] public Game Game;
 

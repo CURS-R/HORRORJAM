@@ -15,7 +15,7 @@ namespace CURSR.Game
         [Networked] public int Index { get; set; }
         [Networked] public Player Holder { get; set; }
 
-        private ItemSO ItemSO => gameContainer.ItemsRegistry.Items[Index];
+        public ItemSO ItemSO => gameContainer.ItemSOsRegistry.Items[Index];
 
         public override void Spawned()
         {
@@ -47,6 +47,14 @@ namespace CURSR.Game
             // TODO:
             player.Inventory.Add(Index);
             Holder = player;
+        }
+        
+        [Rpc(sources: RpcSources.All, targets: RpcTargets.StateAuthority)]
+        public void RPC_Use()
+        {
+            // TODO:
+            Holder.Inventory.Add(Index);
+            Holder = default;
         }
         
         [Rpc(sources: RpcSources.All, targets: RpcTargets.StateAuthority)]

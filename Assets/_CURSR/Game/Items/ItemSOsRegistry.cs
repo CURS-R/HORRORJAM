@@ -6,7 +6,7 @@ using UnityEngine;
 namespace CURSR.Game
 {
     [CreateAssetMenu(fileName = "ItemsRegistry", menuName = "CURSR/Game/Inventory/ItemsRegistry")]
-    public class ItemsRegistry : ScriptableObject
+    public class ItemSOsRegistry : ScriptableObject
     {
         [field: SerializeField] public List<ItemSO> Items { get; private set; }
         

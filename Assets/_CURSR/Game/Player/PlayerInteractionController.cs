@@ -14,26 +14,34 @@ namespace CURSR.Game
         private readonly PlayerInteractionSettings _settings;
         private readonly Transform _viewTransform;
         
-        public void Process(float deltaTime)
+        public InteractionControllerData Process(float deltaTime)
         {
             var input = PollInput();
+            var data = new InteractionControllerData();
 
-            if (input.LeftClick)
+            if (DrawRayForItem(out var item))
             {
-                if (DrawRayForItem(out var item))
+                data.hoveredItem = item;
+                if (input.LeftClick)
                 {
+                    data.isPickingup = true;
                     Debug.Log("Hit item.");
                     // TODO: interact with item
+
                 }
             }
             if (input.RightClick)
             {
+                data.isUsing = true;
                 // TODO: use item
             }
             if (input.Q)
             {
+                data.isDropping = true;
                 // TODO: drop item
             }
+
+            return data;
         }
 
         private bool DrawRayForItem(out Item item)
@@ -56,5 +64,14 @@ namespace CURSR.Game
 
             return false;
         }
+    }
+    
+    public class InteractionControllerData
+    {
+        public Item hoveredItem = null;
+        public bool isHovering = false;
+        public bool isPickingup = false;
+        public bool isUsing = false;
+        public bool isDropping = false;
     }
 }

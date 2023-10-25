@@ -24,11 +24,31 @@ namespace CURSR.Game
         
         [Networked, Capacity(32), UnitySerializeField]
         [HideInInspector] public NetworkLinkedList<int> Inventory { get; }
-        [HideInInspector] public List<ItemSO> Items => Inventory.Select(itemIndex => gameContainer.ItemsRegistry.Items[itemIndex]).ToList();
-        private int selectedItem;
-        
-        public event Action<int> ChangeItemSelection;
-        public void InvokeChangeItemSelection(int itemSelection) => ChangeItemSelection?.Invoke(itemSelection);
+        [HideInInspector] public List<ItemSO> Items => Inventory.Select(itemIndex => gameContainer.ItemSOsRegistry.Items[itemIndex]).ToList();
+
+        private int _hotbarIndex;
+        public int SelectedHotbarIndex
+        {
+            get => _hotbarIndex;
+            set
+            {
+                _hotbarIndex = Mathf.Clamp(value, 0, settingsContainer.PlayerSettings.PlayerInventorySettings.MaxInventoryHotbar);
+                InvokeChangeItemSelection(_hotbarIndex);
+            }
+        }
+
+        public event Action<int> ChangeHotbarSelection;
+        public void InvokeChangeItemSelection(int itemSelection) => ChangeHotbarSelection?.Invoke(itemSelection);
+        public event Action<Item> HoverOverItem;
+        public void InvokeHoverOverItem(Item item) => HoverOverItem?.Invoke(item);
+        public event Action UnHoverOverItem;
+        public void InvokeUnHoverOverItem() => UnHoverOverItem?.Invoke();
+        public event Action<Item, int> PickupItem;
+        public void InvokePickupItem(Item item, int hotbarIndex) => PickupItem?.Invoke(item, hotbarIndex);
+        public event Action<Item> UseItem;
+        public void InvokeUseItem(Item item) => UseItem?.Invoke(item);
+        public event Action<Item, int> DropItem;
+        public void InvokeDropItem(Item item, int hotbarIndex) => DropItem?.Invoke(item, hotbarIndex);
 
         private PlayerCharacterController playerCharacterController;
         private PlayerViewController playerViewController;
@@ -64,32 +84,6 @@ namespace CURSR.Game
             }
         }
 
-        private void SetupControllers()
-        {
-            playerCharacterController ??= new(settingsContainer.PlayerSettings.PlayerMovementSettings, localCC);
-            playerViewController ??= new(settingsContainer.PlayerSettings.PlayerViewSettings, localViewTransform);
-            playerInteractionController ??= new(settingsContainer.PlayerSettings.PlayerInteractionSettings, localViewTransform);
-            playerInventoryController ??= new();
-            if (HasInputAuthority)
-            {
-                localCC.enabled = true;
-                playerCharacterController.Enable();
-                playerViewController.Enable();
-                playerInteractionController.Enable();
-                playerInventoryController.Enable();
-                GameObjectUtil.ChangeLayerRecursively(this.transform, layerMaskForLocalPlayer);
-            }
-            else
-            {
-                localCC.enabled = false;
-                playerCharacterController.Disable();
-                playerViewController.Disable();
-                playerInteractionController.Enable();
-                playerInventoryController.Enable();
-                GameObjectUtil.ChangeLayerRecursively(this.transform, initialLayerMask);
-            }
-        }
-
         public void OnInput(NetworkRunner runner, NetworkInput input)
         {
             if (!HasInputAuthority) return;
@@ -117,15 +111,7 @@ namespace CURSR.Game
         {
             if (HasInputAuthority)
             {
-                // TODO: Cursor Lockstate
-                //if (Cursor.lockState != CursorLockMode.Locked)
-                //{
-                    playerViewController.Process();
-                    playerCharacterController.ProcessRotate(playerViewController.GetPitch(), Time.deltaTime);
-                //}
-                playerCharacterController.ProcessMove(Time.deltaTime);
-                playerInteractionController.Process(Time.deltaTime);
-                playerInventoryController.Process(Time.deltaTime);
+                ProcessControllers();
             }
             else
             {
@@ -150,6 +136,66 @@ namespace CURSR.Game
         public void OnReliableDataReceived(NetworkRunner runner, PlayerRef player, ArraySegment<byte> data){}
         public void OnSceneLoadDone(NetworkRunner runner){}
         public void OnSceneLoadStart(NetworkRunner runner){}
+        
+        private void SetupControllers()
+        {
+            playerCharacterController ??= new(settingsContainer.PlayerSettings.PlayerMovementSettings, localCC);
+            playerViewController ??= new(settingsContainer.PlayerSettings.PlayerViewSettings, localViewTransform);
+            playerInteractionController ??= new(settingsContainer.PlayerSettings.PlayerInteractionSettings, localViewTransform);
+            playerInventoryController ??= new();
+            if (HasInputAuthority)
+            {
+                localCC.enabled = true;
+                playerCharacterController.Enable();
+                playerViewController.Enable();
+                playerInteractionController.Enable();
+                playerInventoryController.Enable();
+                GameObjectUtil.ChangeLayerRecursively(this.transform, layerMaskForLocalPlayer);
+            }
+            else
+            {
+                localCC.enabled = false;
+                playerCharacterController.Disable();
+                playerViewController.Disable();
+                playerInteractionController.Enable();
+                playerInventoryController.Enable();
+                GameObjectUtil.ChangeLayerRecursively(this.transform, initialLayerMask);
+            }
+        }
+
+        private void ProcessControllers()
+        {
+            // TODO: Cursor Lockstate
+            //if (Cursor.lockState != CursorLockMode.Locked)
+            //{
+                playerViewController.Process();
+                playerCharacterController.ProcessRotate(playerViewController.GetPitch(), Time.deltaTime);
+            //}
+            playerCharacterController.ProcessMove(Time.deltaTime);
+            HandleInteractionData(playerInteractionController.Process(Time.deltaTime));
+            playerInventoryController.Process(Time.deltaTime);
+            
+        }
+
+        private void HandleInteractionData(InteractionControllerData data)
+        {
+            if (data.isHovering)
+            {
+                InvokeHoverOverItem(data.hoveredItem);
+                if (data.isPickingup)
+                {
+                    data.hoveredItem.RPC_Pickup(this);
+                }
+            }
+            if (data.isUsing)
+            {
+                
+            }
+            if (data.isDropping)
+            {
+                
+            }
+        }
     }
     
     [System.Serializable]
