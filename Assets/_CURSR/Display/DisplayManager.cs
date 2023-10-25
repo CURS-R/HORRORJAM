@@ -16,6 +16,7 @@ namespace CURSR.Display
 {
     public class DisplayManager : Singleton<DisplayManager>
     {
+        [Header("Containers")]
         [field:SerializeField] private VisualContainer visualContainer;
         [field:SerializeField] private DisplayContainer displayContainer;
         [field:SerializeField] private GameContainer gameContainer;
@@ -23,10 +24,11 @@ namespace CURSR.Display
         [field:SerializeField] private MapContainer mapContainer;
         [field:SerializeField] private SavesContainer savesContainer;
         [field:SerializeField] private SettingsContainer settingsContainer;
-        protected override void Init()
-        {
-            UpdateHotbarItemDisplays();
-        }
+        
+        [Header("Components")]
+        [field:SerializeField] private Hotbar hotbar;
+        
+        protected override void Init() { }
 
         private void OnEnable()
         {
@@ -37,39 +39,11 @@ namespace CURSR.Display
         private void BindToPlayer(Player player)
         {
             boundPlayer = player;
-            player.ChangeItemSelection += SetHotbarItemDisplay;
+            player.ChangeHotbarSelection += hotbar.SelectItemInHotbar;
+            // TODO: item hovering display
+            //player.HoverOverItem += 
+            //player.UnHoverOverItem +=
+            hotbar.ResetHotbar();
         }
-        
-        [field:SerializeField] private List<ItemDisplay> ItemDisplays;
-
-        private int _hotbarIndex;
-
-        private int HotbarIndex
-        {
-            get
-            {
-                return _hotbarIndex;
-            }
-            set
-            {
-                _hotbarIndex = Mathf.Clamp(value, 0, ItemDisplays.Count);
-                UpdateHotbarItemDisplays();
-            }
-        }
-
-        private void SetHotbarItemDisplay(int index)
-        {
-            var itemSprite = gameContainer.ItemsRegistry.Items[index].icon;
-            // TODO:
-        }
-
-        private void UpdateHotbarItemDisplays()
-        {
-            foreach (var itemDisplay in ItemDisplays) 
-                itemDisplay.SelectionVisibility = false;
-            ItemDisplays[HotbarIndex].SelectionVisibility = true;
-        }
-
-
     }
 }

@@ -6,17 +6,20 @@ namespace CURSR.Display
 {
     public class ItemDisplay : MonoBehaviour
     {
+        [Header("Containers")]
+        [field:SerializeField] private GameContainer gameContainer;
+        
         [field:SerializeField] private Image ItemSpriteImage;
         [field:SerializeField] private GameObject SelectionVisual;
-        
-        private Sprite itemSprite;
-        public Sprite ItemSprite
+
+        private Item _itemBind;
+        public Item itemBind
         {
-            get => itemSprite;
+            get => _itemBind;
             set
             {
-                ItemSpriteImage.sprite = value == null ? default : itemSprite;
-                itemSprite = value;
+                ItemSpriteImage.sprite = value == null ? default : value.ItemSO.icon;
+                _itemBind = value;
             }
         }
 
