@@ -1,0 +1,20 @@
+{
+    "name": "CURSR.Camera",
+    "rootNamespace": "CURSR.Camera",
+    "references": [
+        "GUID:74c45ce8540de744aa4d11fdf83927d0",
+        "GUID:a0208b1d2bc83cf44be2d39789881ba9",
+        "GUID:d28276d3b667e2b45acf90994c3edac2",
+        "GUID:586b31e934e955c4dad989e42bed1c33",
+        "GUID:281592cc8441ec343875ac2568e3fe10"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

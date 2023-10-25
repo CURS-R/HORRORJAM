@@ -7,19 +7,18 @@ using CURSR.Saves;
 using CURSR.Settings;
 using CURSR.Utils;
 
-namespace CURSR.Network
+namespace CURSR.Game
 {
     public class GameManager : Singleton<GameManager>
     {
         [field:SerializeField] private GameContainer gameContainer;
         [field:SerializeField] private NetworkContainer networkContainer;
-        
-        private bool isHost(NetworkRunner runner) => runner.IsSinglePlayer || runner.IsServer;
-        
         protected override void Init()
         {
             
         }
+        
+        private bool isHost(NetworkRunner runner) => runner.IsSinglePlayer || runner.IsServer;
 
         private void OnEnable()
         {
@@ -29,7 +28,7 @@ namespace CURSR.Network
         
         private void OnDisable()
         {
-            // TODO: event unregisters
+            // LATER: event unregisters
         }
         
         private void SpawnGame(NetworkRunner runner)
@@ -44,6 +43,8 @@ namespace CURSR.Network
                     var game = no.GetBehaviour<Game>();
                 });
             Log("Game has been spawned.");
+            
+            SpawnItem(runner, 0);
         }
 
         private void SpawnPlayer(NetworkRunner runner, PlayerRef playerRef)
@@ -76,6 +77,25 @@ namespace CURSR.Network
             }
             runner.SetPlayerObject(playerRef, player.GetBehaviour<NetworkObject>());
             gameContainer.Game.Players.Set(playerRef, player);
+        }
+
+        private void SpawnItem(NetworkRunner runner, int itemIndex)
+        {
+            if (!isHost(runner)) return;
+
+            // TODO: spawnpoints and rotations
+            var spawnPos = new Vector3(0,10,0);
+            var spawnRot = Quaternion.Euler(10,10,10);
+            var item = runner.Spawn(
+                prefab: gameContainer.ItemPrefab,
+                position: spawnPos,
+                rotation: spawnRot,
+                onBeforeSpawned:(runner, no) =>
+                {
+                    var item = no.GetBehaviour<Item>();
+                    item.Index = itemIndex;
+                });
+            Log("We spawned a new item.");
         }
         
         private void Log(string message) => Debug.Log(message, this);
