@@ -2,7 +2,9 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using Unity.VisualScripting;
+using UnityEditor.EventSystems;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace CURSR
@@ -13,6 +15,7 @@ namespace CURSR
         [SerializeField] private TextMeshProUGUI _puzzlePrompt;
         [SerializeField] private Slider _timerSlider;
         [SerializeField] private Image _timerSliderFill;
+        public EventSystem _eventSystem;
 
         // Target Spawning
         [SerializeField] private List<TTCP_Target> Targets;
@@ -173,27 +176,36 @@ namespace CURSR
         {
             if (this._puzzleResult == null)
             {
-                Debug.Log($"'PuzzleResult' reference missing. Maybe forgot to drag it in editor.");
+                Debug.LogError($"'PuzzleResult' reference missing. Maybe forgot to drag it in editor.");
             }
 
             if (this._puzzlePrompt == null)
             {
-                Debug.Log($"'PuzzlePrompt' reference missing. Maybe forgot to drag it in editor.");
+                Debug.LogError($"'PuzzlePrompt' reference missing. Maybe forgot to drag it in editor.");
             }
 
             if (this._timerSlider == null)
             {
-                Debug.Log($"'TimerSlider' reference missing. Maybe forgot to drag it in editor.");
+                Debug.LogError($"'TimerSlider' reference missing. Maybe forgot to drag it in editor.");
             }
 
             if (this._timerSliderFill == null)
             {
-                Debug.Log($"'TimerSliderFill' reference is missing. Maybe forgot to drag it in editor.");
+                Debug.LogError($"'TimerSliderFill' reference is missing. Maybe forgot to drag it in editor.");
             }
 
             if (this.Targets.Count < 1)
             {
-                Debug.Log($"'Target' list is empty. There are no targets to spawn for this puzzle.");
+                Debug.LogError($"'Target' list is empty. There are no targets to spawn for this puzzle.");
+            }
+
+            if (this._eventSystem == null)
+            {
+                this._eventSystem = FindObjectOfType<EventSystem>();
+                if (this._eventSystem == null)
+                {
+                    Debug.LogError($"There is no event system in the scene. The scene must have an EventSystem object for this puzzle to work properly. Try adding one. [UI > Event System]");
+                }
             }
         }
     }
