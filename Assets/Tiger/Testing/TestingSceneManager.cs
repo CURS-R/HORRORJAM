@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace CURSR
 {
-    public class SceneTester : MonoBehaviour
+    public class TestingSceneManager : MonoBehaviour
     {
         public GameObject TimerTimeClickPuzzle;
 
@@ -18,7 +18,7 @@ namespace CURSR
         void Update()
         {
             // Testing Target Time Click Puzzle
-            if (Input.GetKeyDown(KeyCode.Space))
+            if (UnityEngine.Input.GetKeyDown(KeyCode.Space))
             {
                 Instantiate(this.TimerTimeClickPuzzle);
             }
