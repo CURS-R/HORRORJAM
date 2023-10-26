@@ -188,7 +188,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gameContainer: {fileID: 11400000, guid: 4c0c23c9a6d3a95458482721097c6d25, type: 2}
   settingsContainer: {fileID: 11400000, guid: 1d5d4d22ea58e9649a63387ff373431f, type: 2}
-  hotbarLabelTMP: {fileID: 0}
+  itemLabelTMP: {fileID: 1336323947823901437}
   itemDisplayPrefab: {fileID: 2019482515914666567, guid: 498da9c955db04049ab73f5a5cf37d5d, type: 3}
   itemDisplaysClonePoint: {fileID: 6643376757225467534}
 --- !u!1 &6643376757225467521

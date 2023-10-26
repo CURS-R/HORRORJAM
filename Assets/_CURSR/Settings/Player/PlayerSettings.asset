@@ -21,7 +21,9 @@ MonoBehaviour:
   PlayerViewSettings:
     <Sensitivity>k__BackingField: 10
   PlayerInteractionSettings:
-    rayDistance: 100
-    hitLayers:
+    <RayDistance>k__BackingField: 100
+    <HitLayers>k__BackingField:
       serializedVersion: 2
       m_Bits: 4294967295
+  PlayerHotbarSettings:
+    <MaxHotbarItems>k__BackingField: 3

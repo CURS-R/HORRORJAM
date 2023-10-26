@@ -40,7 +40,7 @@ namespace CURSR.Display
             foreach (var itemDisplay in itemDisplaysPool)
                 Destroy(itemDisplay.gameObject);
             itemDisplaysPool.Clear();
-            for (int i = 0; i < settingsContainer.PlayerSettings.PlayerInventorySettings.MaxInventoryHotbar; i++)
+            for (int i = 0; i < settingsContainer.PlayerSettings.PlayerHotbarSettings.MaxHotbarItems; i++)
                 itemDisplaysPool.Add(Instantiate(itemDisplayPrefab, itemDisplaysClonePoint));
         }
 
@@ -56,7 +56,8 @@ namespace CURSR.Display
             foreach (var itemDisplay in itemDisplaysPool) 
                 itemDisplay.SelectionVisibility = false;
             itemDisplaysPool[index].SelectionVisibility = true;
-            itemLabelTMP.text = itemDisplaysPool[index].itemBind.ItemSO.name;
+            if (itemDisplaysPool[index].itemBind != null)
+                itemLabelTMP.text = itemDisplaysPool[index].itemBind.ItemSO.name;
         }
     }
 }

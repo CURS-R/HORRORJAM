@@ -22,20 +22,9 @@ namespace CURSR.Game
         [Networked]
         [HideInInspector] public ref PlayerData PlayerData => ref MakeRef<PlayerData>();
         
-        [Networked, Capacity(32), UnitySerializeField]
-        [HideInInspector] public NetworkLinkedList<int> Inventory { get; }
-        [HideInInspector] public List<ItemSO> Items => Inventory.Select(itemIndex => gameContainer.ItemSOsRegistry.Items[itemIndex]).ToList();
-
-        private int _hotbarIndex;
-        public int SelectedHotbarIndex
-        {
-            get => _hotbarIndex;
-            set
-            {
-                _hotbarIndex = Mathf.Clamp(value, 0, settingsContainer.PlayerSettings.PlayerInventorySettings.MaxInventoryHotbar);
-                InvokeChangeItemSelection(_hotbarIndex);
-            }
-        }
+        [Networked, Capacity(10), UnitySerializeField]
+        [HideInInspector] public NetworkLinkedList<int> HotbarItems { get; }
+        [HideInInspector] public List<ItemSO> Items => HotbarItems.Select(itemIndex => gameContainer.ItemSOsRegistry.Items[itemIndex]).ToList();
 
         public event Action<int> ChangeHotbarSelection;
         public void InvokeChangeItemSelection(int itemSelection) => ChangeHotbarSelection?.Invoke(itemSelection);
@@ -53,7 +42,7 @@ namespace CURSR.Game
         private PlayerCharacterController playerCharacterController;
         private PlayerViewController playerViewController;
         private PlayerInteractionController playerInteractionController;
-        private PlayerInventoryController playerInventoryController;
+        private PlayerHotbarController playerHotbarController;
         
         private LayerMask initialLayerMask;
 
@@ -142,14 +131,14 @@ namespace CURSR.Game
             playerCharacterController ??= new(settingsContainer.PlayerSettings.PlayerMovementSettings, localCC);
             playerViewController ??= new(settingsContainer.PlayerSettings.PlayerViewSettings, localViewTransform);
             playerInteractionController ??= new(settingsContainer.PlayerSettings.PlayerInteractionSettings, localViewTransform);
-            playerInventoryController ??= new();
+            playerHotbarController ??= new(settingsContainer.PlayerSettings.PlayerHotbarSettings);
             if (HasInputAuthority)
             {
                 localCC.enabled = true;
                 playerCharacterController.Enable();
                 playerViewController.Enable();
                 playerInteractionController.Enable();
-                playerInventoryController.Enable();
+                playerHotbarController.Enable();
                 GameObjectUtil.ChangeLayerRecursively(this.transform, layerMaskForLocalPlayer);
             }
             else
@@ -158,7 +147,7 @@ namespace CURSR.Game
                 playerCharacterController.Disable();
                 playerViewController.Disable();
                 playerInteractionController.Enable();
-                playerInventoryController.Enable();
+                playerHotbarController.Enable();
                 GameObjectUtil.ChangeLayerRecursively(this.transform, initialLayerMask);
             }
         }
@@ -172,29 +161,34 @@ namespace CURSR.Game
                 playerCharacterController.ProcessRotate(playerViewController.GetPitch(), Time.deltaTime);
             //}
             playerCharacterController.ProcessMove(Time.deltaTime);
-            HandleInteractionData(playerInteractionController.Process(Time.deltaTime));
-            playerInventoryController.Process(Time.deltaTime);
-            
+            HandleInteractionControllerData(playerInteractionController.Process(Time.deltaTime));
+            HandleHotbarControllerData(playerHotbarController.Process(Time.deltaTime));
         }
 
-        private void HandleInteractionData(InteractionControllerData data)
+        private void HandleInteractionControllerData(PlayerInteractionControllerData data)
         {
-            if (data.isHovering)
+            if (data.IsHovering)
             {
-                InvokeHoverOverItem(data.hoveredItem);
-                if (data.isPickingup)
+                InvokeHoverOverItem(data.HoveredItem);
+                if (data.IsPickingup)
                 {
-                    data.hoveredItem.RPC_Pickup(this);
+                    Debug.Log("Hit item.");
+                    data.HoveredItem.RPC_Pickup(this);
                 }
             }
-            if (data.isUsing)
+            if (data.IsUsing)
             {
-                
+                data.HoveredItem.RPC_Use();
             }
-            if (data.isDropping)
+            if (data.IsDropping)
             {
-                
+                data.HoveredItem.RPC_Drop();
             }
+        }
+
+        private void HandleHotbarControllerData(PlayerHotbarControllerData data)
+        {
+            InvokeChangeItemSelection(data.HotbarIndex);
         }
     }
     

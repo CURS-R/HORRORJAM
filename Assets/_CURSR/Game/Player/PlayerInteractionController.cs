@@ -1,5 +1,6 @@
 ﻿using CURSR.Input;
 using CURSR.Settings;
+using CURSR.Utils;
 using UnityEngine;
 
 namespace CURSR.Game
@@ -14,31 +15,25 @@ namespace CURSR.Game
         private readonly PlayerInteractionSettings _settings;
         private readonly Transform _viewTransform;
         
-        public InteractionControllerData Process(float deltaTime)
+        public PlayerInteractionControllerData Process(float deltaTime)
         {
+            var data = new PlayerInteractionControllerData();
             var input = PollInput();
-            var data = new InteractionControllerData();
 
-            if (DrawRayForItem(out var item))
+            if (DrawRayForItem(out data.HoveredItem))
             {
-                data.hoveredItem = item;
                 if (input.LeftClick)
                 {
-                    data.isPickingup = true;
-                    Debug.Log("Hit item.");
-                    // TODO: interact with item
-
+                    data.IsPickingup = true;
                 }
             }
             if (input.RightClick)
             {
-                data.isUsing = true;
-                // TODO: use item
+                data.IsUsing = true;
             }
             if (input.Q)
             {
-                data.isDropping = true;
-                // TODO: drop item
+                data.IsDropping = true;
             }
 
             return data;
@@ -49,29 +44,27 @@ namespace CURSR.Game
             item = null;
             Ray ray = new(_viewTransform.position, _viewTransform.forward);
 
-            if (Physics.Raycast(ray, out var hit, _settings.rayDistance, _settings.hitLayers))
+            if (Physics.Raycast(ray, out var hit, _settings.RayDistance, _settings.HitLayers))
             {
-                Debug.Log("Hit object: " + hit.collider.name);
-                item = Utils.Colliders.GetComponentUpwards<Item>(hit.collider.gameObject);
-        
+                item = Colliders.GetComponentUpwards<Item>(hit.collider.gameObject);
                 if (item != null)
                 {
                     return true;
                 }
             }
 
-            Debug.DrawRay(_viewTransform.position, _viewTransform.forward * _settings.rayDistance, Color.red);
+            Debug.DrawRay(_viewTransform.position, _viewTransform.forward * _settings.RayDistance, Color.red);
 
             return false;
         }
     }
     
-    public class InteractionControllerData
+    public class PlayerInteractionControllerData
     {
-        public Item hoveredItem = null;
-        public bool isHovering = false;
-        public bool isPickingup = false;
-        public bool isUsing = false;
-        public bool isDropping = false;
+        public Item HoveredItem = null;
+        public bool IsHovering => HoveredItem != null;
+        public bool IsPickingup = false;
+        public bool IsUsing = false;
+        public bool IsDropping = false;
     }
 }
