@@ -10,13 +10,13 @@ namespace CURSR.Game
     public class PlayerCharacterController : InputPoller
     {
         // Constructor
-        public PlayerCharacterController(CharacterController characterController, PlayerMovementSettings playerMovementSettings)
+        public PlayerCharacterController(PlayerMovementSettings settings, CharacterController characterController)
         {
+            _settings = settings;
             _characterController = characterController;
-            _playerMovementSettings = playerMovementSettings;
         }
+        private readonly PlayerMovementSettings _settings;
         private readonly CharacterController _characterController;
-        private readonly PlayerMovementSettings _playerMovementSettings;
         private Transform _forwardTransform => _characterController.transform;
         
         // Consts
@@ -50,7 +50,7 @@ namespace CURSR.Game
                     elevationChange.y++;
                 if (input.isCrouching)
                     elevationChange.y--;
-                fallingVelocity = elevationChange * _playerMovementSettings.JumpSpeed * 1000 * deltaTime;
+                fallingVelocity = elevationChange * _settings.JumpSpeed * 1000 * deltaTime;
                 if ((_characterController.collisionFlags & CollisionFlags.Below) != 0)
                     _characterController.Move((_forwardTransform.forward * forwardInputValue + _forwardTransform.right * sideInputValue) * deltaTime);
                 else
@@ -59,7 +59,7 @@ namespace CURSR.Game
             else
             {
                 if ((_characterController.collisionFlags & CollisionFlags.Below) != 0 && input.isJumping)
-                    fallingVelocity = Vector3.up * _playerMovementSettings.JumpSpeed;
+                    fallingVelocity = Vector3.up * _settings.JumpSpeed;
                 else if ((_characterController.collisionFlags & CollisionFlags.Below) != 0)
                     fallingVelocity = Vector3.zero;
                 else
@@ -71,7 +71,7 @@ namespace CURSR.Game
         #region UTIL
         private void DoLerp(PlayerMovementInputStruct input, out float forwardInputValue, out float sideInputValue, bool isFlying, float deltaTime)
         {
-            float moveSpeed = _playerMovementSettings.GetSpeed(input.isSprinting, isFlying);
+            float moveSpeed = _settings.GetSpeed(input.isSprinting, isFlying);
             forwardInputValue = input.moveInput.y * MovementLerp(0,  moveSpeed, deltaTime);
             sideInputValue = input.moveInput.x * MovementLerp(0, moveSpeed, deltaTime);
             if (forwardInputValue == 0 && sideInputValue == 0 && (_characterController.collisionFlags & CollisionFlags.Below) != 0)

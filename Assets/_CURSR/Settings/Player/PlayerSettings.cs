@@ -8,6 +8,8 @@ namespace CURSR.Settings
     {
         public PlayerMovementSettings PlayerMovementSettings;
         public PlayerViewSettings PlayerViewSettings;
+        public PlayerInteractionSettings PlayerInteractionSettings;
+        public PlayerInventorySettings PlayerInventorySettings;
     }
     
     [System.Serializable]
@@ -30,5 +32,18 @@ namespace CURSR.Settings
     public class PlayerViewSettings
     {
         [field:SerializeField] public float Sensitivity { get; private set; }
+    }
+
+    [System.Serializable]
+    public class PlayerInteractionSettings
+    {
+        [field:SerializeField] public float rayDistance { get; private set; }
+        [field:SerializeField] public LayerMask hitLayers { get; private set; }
+    }
+
+    [System.Serializable]
+    public class PlayerInventorySettings
+    {
+        [field:SerializeField] public int MaxInventoryHotbar { get; private set; }
     }
 }

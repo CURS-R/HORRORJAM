@@ -20,3 +20,8 @@ MonoBehaviour:
     <FastFlySpeed>k__BackingField: 8
   PlayerViewSettings:
     <Sensitivity>k__BackingField: 10
+  PlayerInteractionSettings:
+    rayDistance: 100
+    hitLayers:
+      serializedVersion: 2
+      m_Bits: 4294967295

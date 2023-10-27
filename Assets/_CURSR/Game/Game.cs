@@ -3,7 +3,7 @@ using Fusion;
 using UnityEngine;
 using CURSR.Game;
 
-namespace CURSR.Network
+namespace CURSR.Game
 {
     public class Game : NetworkBehaviour
     {

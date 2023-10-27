@@ -10,7 +10,7 @@ using CURSR.Saves;
 using CURSR.Settings;
 using CURSR.Utils;
 
-namespace CURSR.Network
+namespace CURSR.Game
 {
     [CreateAssetMenu(fileName = "GameContainer", menuName = "CURSR/Container/Game")]
     public class GameContainer : ScriptableObject
@@ -19,6 +19,9 @@ namespace CURSR.Network
         [field: Header("Prefabs")]
         [field:SerializeField] public Game GamePrefab { get; private set; }
         [field:SerializeField] public Player PlayerPrefab { get; private set; }
+        [field:SerializeField] public Item ItemPrefab { get; private set; }
+        [field: Header("Registries")]
+        [field:SerializeField] public ItemSOsRegistry ItemSOsRegistry { get; private set; }
 
         [HideInInspector] public Game Game;
 
@@ -28,6 +31,8 @@ namespace CURSR.Network
         public void InvokeLocalPlayerSpawnedEvent(Player player) => LocalPlayerSpawnedEvent?.Invoke(player);
         public event Action<Enemy> EnemySpawnedEvent;
         public void InvokeEnemySpawnedEvent(Enemy enemy) => EnemySpawnedEvent?.Invoke(enemy);
+        public event Action<ItemSO> ItemSpawnedEvent;
+        public void InvokeItemSpawnedEvent(ItemSO itemSo) => ItemSpawnedEvent?.Invoke(itemSo);
 
         private void Log(string message) => Debug.Log(message, this);
     }
