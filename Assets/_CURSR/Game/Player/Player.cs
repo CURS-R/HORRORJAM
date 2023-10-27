@@ -23,8 +23,7 @@ namespace CURSR.Game
         [HideInInspector] public ref PlayerData PlayerData => ref MakeRef<PlayerData>();
         
         [Networked, Capacity(10), UnitySerializeField]
-        [HideInInspector] public NetworkLinkedList<int> HotbarItems { get; }
-        [HideInInspector] public List<ItemSO> Items => HotbarItems.Select(itemIndex => gameContainer.ItemSOsRegistry.Items[itemIndex]).ToList();
+        public NetworkLinkedList<Item> Items { get; }
 
         public event Action<int> ChangeHotbarSelection;
         public void InvokeChangeItemSelection(int itemSelection) => ChangeHotbarSelection?.Invoke(itemSelection);
@@ -36,8 +35,8 @@ namespace CURSR.Game
         public void InvokePickupItem(Item item, int hotbarIndex) => PickupItem?.Invoke(item, hotbarIndex);
         public event Action<Item> UseItem;
         public void InvokeUseItem(Item item) => UseItem?.Invoke(item);
-        public event Action<Item, int> DropItem;
-        public void InvokeDropItem(Item item, int hotbarIndex) => DropItem?.Invoke(item, hotbarIndex);
+        public event Action<Item> DropItem;
+        public void InvokeDropItem(Item item) => DropItem?.Invoke(item);
 
         private PlayerCharacterController playerCharacterController;
         private PlayerViewController playerViewController;
@@ -172,23 +171,36 @@ namespace CURSR.Game
                 InvokeHoverOverItem(data.HoveredItem);
                 if (data.IsPickingup)
                 {
-                    Debug.Log("Hit item.");
+                    if (Items.Count >= settingsContainer.PlayerSettings.PlayerHotbarSettings.MaxCapacity)
+                        return;
+                    Debug.Log("Trying item-pickup");
                     data.HoveredItem.RPC_Pickup(this);
                 }
-            }
-            if (data.IsUsing)
-            {
-                data.HoveredItem.RPC_Use();
-            }
-            if (data.IsDropping)
-            {
-                data.HoveredItem.RPC_Drop();
             }
         }
 
         private void HandleHotbarControllerData(PlayerHotbarControllerData data)
         {
             InvokeChangeItemSelection(data.HotbarIndex);
+            try
+            {
+                var selectedItem = Items[data.HotbarIndex];
+                if (selectedItem != null)
+                {
+                    if (data.IsUsing)
+                    {
+                        InvokeUseItem(Items[data.HotbarIndex]);
+                    }
+                    if (data.IsDropping)
+                    {
+                        InvokeDropItem(Items[data.HotbarIndex]);
+                    }
+                }
+            }
+            catch
+            {
+                // ignored
+            }
         }
     }
     

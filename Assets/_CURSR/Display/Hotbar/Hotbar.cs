@@ -19,7 +19,8 @@ namespace CURSR.Display
         [Header("Containers")]
         [field:SerializeField] private GameContainer gameContainer;
         [field:SerializeField] private SettingsContainer settingsContainer;
-        
+        private int maxCapacity => settingsContainer.PlayerSettings.PlayerHotbarSettings.MaxCapacity > 0 ? settingsContainer.PlayerSettings.PlayerHotbarSettings.MaxCapacity : 3;
+
         [Header("Components")]
         [field:SerializeField] private TMP_Text itemLabelTMP;
         
@@ -40,7 +41,7 @@ namespace CURSR.Display
             foreach (var itemDisplay in itemDisplaysPool)
                 Destroy(itemDisplay.gameObject);
             itemDisplaysPool.Clear();
-            for (int i = 0; i < settingsContainer.PlayerSettings.PlayerHotbarSettings.MaxHotbarItems; i++)
+            for (int i = 0; i < maxCapacity; i++)
                 itemDisplaysPool.Add(Instantiate(itemDisplayPrefab, itemDisplaysClonePoint));
         }
 

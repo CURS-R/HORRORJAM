@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using CURSR.Settings;
 using CURSR.Utils;
 using Fusion;
 using JetBrains.Annotations;
@@ -59,8 +60,8 @@ namespace CURSR.Game
                     visualGameObject.SetActive(true);
                 if (colliders != null)
                     foreach (var collider in colliders)
-                        collider.enabled = false;
-                rb.Rigidbody.isKinematic = true;
+                        collider.enabled = true;
+                rb.Rigidbody.isKinematic = false;
             }
             else
             {
@@ -68,44 +69,60 @@ namespace CURSR.Game
                     visualGameObject.SetActive(false);
                 if (colliders != null)
                     foreach (var collider in colliders)
-                        collider.enabled = true;
-                rb.Rigidbody.isKinematic = false;
+                        collider.enabled = false;
+                rb.Rigidbody.isKinematic = true;
             }
         }
 
+        public void Teleport(Transform transform) => Teleport(transform.position, transform.rotation);
         public void Teleport(Vector3 position, Quaternion rotation = default)
         {
             if (rotation == default)
                 rotation = Quaternion.identity;
-            
-            // TODO: Item.Teleport
 
+            rb.transform.SetPositionAndRotation(position, rotation);
         }
 
-        [Rpc(sources: RpcSources.All, targets: RpcTargets.StateAuthority)]
+        [Rpc(sources: RpcSources.All, targets: RpcTargets.All)]
         public void RPC_Pickup(Player player)
         {
-            // TODO: Item.RPC_Pickup
-            player.HotbarItems.Add(Index);
-            Holder = player;
             SetActive(false);
+            player.UseItem += delegate(Item item)
+            {
+                if (item == this)
+                    RPC_Use();
+            };
+            player.DropItem += delegate(Item item)
+            {
+                if (item == this)
+                    RPC_Drop();
+            };
+            if (HasStateAuthority)
+            {
+                player.Items.Add(this);
+                Holder = player;
+            }
         }
         
-        [Rpc(sources: RpcSources.All, targets: RpcTargets.StateAuthority)]
-        public void RPC_Use()
+        [Rpc(sources: RpcSources.All, targets: RpcTargets.All)]
+        protected virtual void RPC_Use()
         {
             // TODO: Item.RPC_Use
-            Holder.HotbarItems.Add(Index);
-            Holder = default;
+            
         }
         
-        [Rpc(sources: RpcSources.All, targets: RpcTargets.StateAuthority)]
-        public void RPC_Drop()
+        [Rpc(sources: RpcSources.All, targets: RpcTargets.All)]
+        protected virtual void RPC_Drop(float force = 5f)
         {
-            // TODO: Item.RPC_Drop
-            Holder.HotbarItems.Add(Index);
-            Holder = default;
             SetActive(true);
+            if (HasStateAuthority)
+            {
+                var newPos = Holder.localViewTransform;
+                Teleport(newPos);
+                rb.Rigidbody.AddForce(newPos.forward * force, ForceMode.Impulse);
+                Holder.Items.Remove(this);
+                Holder = default;
+            }
         }
     }
 }

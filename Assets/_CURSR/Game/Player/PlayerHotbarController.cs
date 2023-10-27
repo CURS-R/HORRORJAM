@@ -15,8 +15,8 @@ namespace CURSR.Game
         private int _hotbarIndex;
         private int hotbarIndex
         {
-            get => Mathf.Clamp(_hotbarIndex, 0, _settings.MaxHotbarItems);
-            set => _hotbarIndex = Mathf.Clamp(value, 0, _settings.MaxHotbarItems);
+            get => Mathf.Clamp(_hotbarIndex, 0, _settings.MaxCapacity);
+            set => _hotbarIndex = Mathf.Clamp(value, 0, _settings.MaxCapacity);
         }
         
         public PlayerHotbarControllerData Process(float deltaTime)
@@ -24,17 +24,23 @@ namespace CURSR.Game
             var data = new PlayerHotbarControllerData();
             var input = PollInput();
             
-            bool up = input.Scroll > 0;
-            bool down = input.Scroll < 1;
-            if (up)
+            if (input.Scroll > 0)
             {
                 hotbarIndex++;
             }
-            if (down)
+            if (input.Scroll < 1)
             {
                 hotbarIndex--;
             }
             data.HotbarIndex = hotbarIndex;
+            if (input.RightClick)
+            {
+                data.IsUsing = true;
+            }
+            if (input.Q)
+            {
+                data.IsDropping = true;
+            }
 
             return data;
         }
@@ -43,5 +49,7 @@ namespace CURSR.Game
     public class PlayerHotbarControllerData
     {
         public int HotbarIndex;
+        public bool IsUsing = false;
+        public bool IsDropping = false;
     }
 }

@@ -27,14 +27,6 @@ namespace CURSR.Game
                     data.IsPickingup = true;
                 }
             }
-            if (input.RightClick)
-            {
-                data.IsUsing = true;
-            }
-            if (input.Q)
-            {
-                data.IsDropping = true;
-            }
 
             return data;
         }
@@ -64,7 +56,5 @@ namespace CURSR.Game
         public Item HoveredItem = null;
         public bool IsHovering => HoveredItem != null;
         public bool IsPickingup = false;
-        public bool IsUsing = false;
-        public bool IsDropping = false;
     }
 }

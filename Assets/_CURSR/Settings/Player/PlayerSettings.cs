@@ -44,6 +44,6 @@ namespace CURSR.Settings
     [System.Serializable]
     public class PlayerHotbarSettings
     {
-        [field:SerializeField] public int MaxHotbarItems { get; private set; }
+        [field:SerializeField] public int MaxCapacity { get; private set; }
     }
 }

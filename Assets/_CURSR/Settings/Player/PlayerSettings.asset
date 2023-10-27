@@ -26,4 +26,4 @@ MonoBehaviour:
       serializedVersion: 2
       m_Bits: 4294967295
   PlayerHotbarSettings:
-    <MaxHotbarItems>k__BackingField: 3
+    <MaxCapacity>k__BackingField: 3
