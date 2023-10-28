@@ -24,19 +24,21 @@ namespace CURSR.Game
         
         [Networked, Capacity(10), UnitySerializeField]
         public NetworkLinkedList<Item> Items { get; }
+        // Because Fusion doesn't update the count properly.
+        public int ItemsCount => Items.Count(item => item != null || item != default);
 
         public event Action<int> ChangeHotbarSelection;
-        public void InvokeChangeItemSelection(int itemSelection) => ChangeHotbarSelection?.Invoke(itemSelection);
+        private void InvokeChangeItemSelection(int itemSelection) => ChangeHotbarSelection?.Invoke(itemSelection);
         public event Action<Item> HoverOverItem;
-        public void InvokeHoverOverItem(Item item) => HoverOverItem?.Invoke(item);
+        private void InvokeHoverOverItem(Item item) => HoverOverItem?.Invoke(item);
         public event Action UnHoverOverItem;
-        public void InvokeUnHoverOverItem() => UnHoverOverItem?.Invoke();
+        private void InvokeUnHoverOverItem() => UnHoverOverItem?.Invoke();
         public event Action<Item, int> PickupItem;
-        public void InvokePickupItem(Item item, int hotbarIndex) => PickupItem?.Invoke(item, hotbarIndex);
+        private void InvokePickupItem(Item item, int hotbarIndex) => PickupItem?.Invoke(item, hotbarIndex);
         public event Action<Item> UseItem;
-        public void InvokeUseItem(Item item) => UseItem?.Invoke(item);
-        public event Action<Item> DropItem;
-        public void InvokeDropItem(Item item) => DropItem?.Invoke(item);
+        private void InvokeUseItem(Item item) => UseItem?.Invoke(item);
+        public event Action<Item, int> DropItem;
+        private void InvokeDropItem(Item item, int hotbarIndex) => DropItem?.Invoke(item, hotbarIndex);
 
         private PlayerCharacterController playerCharacterController;
         private PlayerViewController playerViewController;
@@ -168,13 +170,19 @@ namespace CURSR.Game
         {
             if (data.IsHovering)
             {
-                InvokeHoverOverItem(data.HoveredItem);
+                var item = data.HoveredItem;
+                InvokeHoverOverItem(item);
                 if (data.IsPickingup)
                 {
-                    if (Items.Count >= settingsContainer.PlayerSettings.PlayerHotbarSettings.MaxCapacity)
+                    Debug.Log($"Items.Count{Items.Count}");
+                    Debug.Log($"ItemsCount{ItemsCount}");
+                    if (ItemsCount >= settingsContainer.PlayerSettings.PlayerHotbarSettings.MaxCapacity)
                         return;
                     Debug.Log("Trying item-pickup");
-                    data.HoveredItem.RPC_Pickup(this);
+                    var spoofedItems = Items;
+                    spoofedItems.Add(item);
+                    InvokePickupItem(item, spoofedItems.IndexOf(item));
+                    item.RPC_Pickup(this);
                 }
             }
         }
@@ -182,18 +190,22 @@ namespace CURSR.Game
         private void HandleHotbarControllerData(PlayerHotbarControllerData data)
         {
             InvokeChangeItemSelection(data.HotbarIndex);
-            try
+            try // later: somehow make this not a try-catch
             {
                 var selectedItem = Items[data.HotbarIndex];
                 if (selectedItem != null)
                 {
                     if (data.IsUsing)
                     {
-                        InvokeUseItem(Items[data.HotbarIndex]);
+                        Debug.Log("Trying item-use");
+                        selectedItem.RPC_Use();
+                        InvokeUseItem(selectedItem);
                     }
                     if (data.IsDropping)
                     {
-                        InvokeDropItem(Items[data.HotbarIndex]);
+                        Debug.Log("Trying item-drop");
+                        selectedItem.RPC_Drop();
+                        InvokeDropItem(selectedItem, data.HotbarIndex);
                     }
                 }
             }

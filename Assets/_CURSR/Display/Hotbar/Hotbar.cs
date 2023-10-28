@@ -27,6 +27,8 @@ namespace CURSR.Display
         [field:SerializeField] private ItemDisplay itemDisplayPrefab;
         [field:SerializeField] private Transform itemDisplaysClonePoint;
 
+        private List<ItemDisplay> itemDisplaysPool;
+        
         private void Awake()
         {
             ResetHotbar();
@@ -44,21 +46,20 @@ namespace CURSR.Display
             for (int i = 0; i < maxCapacity; i++)
                 itemDisplaysPool.Add(Instantiate(itemDisplayPrefab, itemDisplaysClonePoint));
         }
-
-        private List<ItemDisplay> itemDisplaysPool;
         
-        public void SetHotbarItemDisplay(Item item, int index)
+        public void SelectItemDisplay(int index)
         {
-            itemDisplaysPool[index].itemBind = item;
-        }
-
-        public void SelectItemInHotbar(int index)
-        {
+            // ItemDisplays
             foreach (var itemDisplay in itemDisplaysPool) 
                 itemDisplay.SelectionVisibility = false;
             itemDisplaysPool[index].SelectionVisibility = true;
+            // ItemLabel
+            itemLabelTMP.text = "";
             if (itemDisplaysPool[index].itemBind != null)
                 itemLabelTMP.text = itemDisplaysPool[index].itemBind.ItemSO.name;
         }
+
+        public void BindItem(Item item, int index) => itemDisplaysPool[index].itemBind = item;
+        public void UnbindItem(Item item, int index) => itemDisplaysPool[index].itemBind = null;
     }
 }

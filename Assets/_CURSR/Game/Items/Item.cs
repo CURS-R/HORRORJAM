@@ -87,38 +87,34 @@ namespace CURSR.Game
         public void RPC_Pickup(Player player)
         {
             SetActive(false);
-            player.UseItem += delegate(Item item)
-            {
-                if (item == this)
-                    RPC_Use();
-            };
-            player.DropItem += delegate(Item item)
-            {
-                if (item == this)
-                    RPC_Drop();
-            };
             if (HasStateAuthority)
             {
-                player.Items.Add(this);
                 Holder = player;
+                Holder.Items.Add(this);
             }
         }
         
         [Rpc(sources: RpcSources.All, targets: RpcTargets.All)]
-        protected virtual void RPC_Use()
+        public virtual void RPC_Use()
         {
             // TODO: Item.RPC_Use
-            
         }
         
         [Rpc(sources: RpcSources.All, targets: RpcTargets.All)]
-        protected virtual void RPC_Drop(float force = 5f)
+        public void RPC_Drop()
         {
             SetActive(true);
             if (HasStateAuthority)
             {
+                if (Holder == null)
+                {
+                    Debug.Log("Holder was null");
+                    return;
+                }
+                Debug.Log(Holder.localViewTransform);
                 var newPos = Holder.localViewTransform;
                 Teleport(newPos);
+                float force = 5f; // LATER: difference drop-forces
                 rb.Rigidbody.AddForce(newPos.forward * force, ForceMode.Impulse);
                 Holder.Items.Remove(this);
                 Holder = default;

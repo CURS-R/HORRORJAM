@@ -12,27 +12,30 @@ namespace CURSR.Game
         }
         private readonly PlayerHotbarSettings _settings;
         
-        private int _hotbarIndex;
+        private int _hotbarIndex = 0;
         private int hotbarIndex
         {
-            get => Mathf.Clamp(_hotbarIndex, 0, _settings.MaxCapacity);
-            set => _hotbarIndex = Mathf.Clamp(value, 0, _settings.MaxCapacity);
+            get => (int)Mathf.Repeat(_hotbarIndex, _settings.MaxCapacity);
+            set => _hotbarIndex = (int)Mathf.Repeat(value, _settings.MaxCapacity);
         }
         
         public PlayerHotbarControllerData Process(float deltaTime)
         {
             var data = new PlayerHotbarControllerData();
             var input = PollInput();
-            
-            if (input.Scroll > 0)
+
+            if (input.Scroll < 0)
             {
+                Debug.Log(input.Scroll);
                 hotbarIndex++;
             }
-            if (input.Scroll < 1)
+            else if (input.Scroll > 0)
             {
+                Debug.Log(input.Scroll);
                 hotbarIndex--;
             }
             data.HotbarIndex = hotbarIndex;
+            
             if (input.RightClick)
             {
                 data.IsUsing = true;
