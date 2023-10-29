@@ -24,8 +24,6 @@ namespace CURSR.Game
         
         [Networked, Capacity(10), UnitySerializeField]
         public NetworkLinkedList<Item> Items { get; }
-        // Because Fusion doesn't update the count properly.
-        public int ItemsCount => Items.Count(item => item != null || item != default);
 
         public event Action<int> ChangeHotbarSelection;
         private void InvokeChangeItemSelection(int itemSelection) => ChangeHotbarSelection?.Invoke(itemSelection);
@@ -175,13 +173,16 @@ namespace CURSR.Game
                 if (data.IsPickingup)
                 {
                     Debug.Log($"Items.Count{Items.Count}");
-                    Debug.Log($"ItemsCount{ItemsCount}");
-                    if (ItemsCount >= settingsContainer.PlayerSettings.PlayerHotbarSettings.MaxCapacity)
+                    foreach (var VARIABLE in Items)
+                    {
+                        Debug.Log("AAAAAAAA " + item.name);
+                    }
+                    if (Items.Count >= settingsContainer.PlayerSettings.PlayerHotbarSettings.MaxCapacity)
                         return;
                     Debug.Log("Trying item-pickup");
-                    var spoofedItems = Items;
-                    spoofedItems.Add(item);
-                    InvokePickupItem(item, spoofedItems.IndexOf(item));
+                    Items.Add(item);
+                    InvokePickupItem(item, Items.IndexOf(item));
+                    Items.Remove(item);
                     item.RPC_Pickup(this);
                 }
             }
@@ -197,14 +198,12 @@ namespace CURSR.Game
                 {
                     if (data.IsUsing)
                     {
-                        Debug.Log("Trying item-use");
                         selectedItem.RPC_Use();
                         InvokeUseItem(selectedItem);
                     }
                     if (data.IsDropping)
                     {
-                        Debug.Log("Trying item-drop");
-                        selectedItem.RPC_Drop();
+                        selectedItem.RPC_Drop(this, data.HotbarIndex);
                         InvokeDropItem(selectedItem, data.HotbarIndex);
                     }
                 }

@@ -26,12 +26,10 @@ namespace CURSR.Game
 
             if (input.Scroll < 0)
             {
-                Debug.Log(input.Scroll);
                 hotbarIndex++;
             }
             else if (input.Scroll > 0)
             {
-                Debug.Log(input.Scroll);
                 hotbarIndex--;
             }
             data.HotbarIndex = hotbarIndex;

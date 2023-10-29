@@ -20,8 +20,6 @@ namespace CURSR.Game
 
         [Networked]
         [HideInInspector] public int Index { get; set; }
-        [Networked]
-        [HideInInspector] public Player Holder { get; set; }
 
         public ItemSO ItemSO => gameContainer.ItemSOsRegistry.Items[Index];
 
@@ -46,10 +44,7 @@ namespace CURSR.Game
 
         private void LateUpdate()
         {
-            if (Holder == null)
-            {
-                // TODO: ?
-            }
+            
         }
 
         public void SetActive(bool active)
@@ -89,8 +84,7 @@ namespace CURSR.Game
             SetActive(false);
             if (HasStateAuthority)
             {
-                Holder = player;
-                Holder.Items.Add(this);
+                player.Items.Add(this);
             }
         }
         
@@ -101,23 +95,16 @@ namespace CURSR.Game
         }
         
         [Rpc(sources: RpcSources.All, targets: RpcTargets.All)]
-        public void RPC_Drop()
+        public void RPC_Drop(Player player, int hotbarIndex)
         {
             SetActive(true);
             if (HasStateAuthority)
             {
-                if (Holder == null)
-                {
-                    Debug.Log("Holder was null");
-                    return;
-                }
-                Debug.Log(Holder.localViewTransform);
-                var newPos = Holder.localViewTransform;
+                var newPos = player.localViewTransform;
                 Teleport(newPos);
                 float force = 5f; // LATER: difference drop-forces
                 rb.Rigidbody.AddForce(newPos.forward * force, ForceMode.Impulse);
-                Holder.Items.Remove(this);
-                Holder = default;
+                player.Items.Remove(this);
             }
         }
     }
