@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 namespace CURSR.Utils
 {
@@ -6,7 +7,7 @@ namespace CURSR.Utils
     {
         public static T GetComponentUpwards<T>(GameObject obj) where T : Component
         {
-            Transform t = obj.transform;
+            var t = obj.transform;
 
             while (t != null)
             {
@@ -19,6 +20,24 @@ namespace CURSR.Utils
             }
 
             return null;
+        }
+        
+        public static List<Collider> GetAllColliders(GameObject obj)
+        {
+            List<Collider> colliders = new();
+            GetAllCollidersRecursive(obj.transform, colliders);
+            return colliders;
+        }
+
+        private static void GetAllCollidersRecursive(Transform t, List<Collider> colliders)
+        {
+            var localColliders = t.GetComponents<Collider>();
+            colliders.AddRange(localColliders);
+
+            foreach (Transform child in t)
+            {
+                GetAllCollidersRecursive(child, colliders);
+            }
         }
     }
 }

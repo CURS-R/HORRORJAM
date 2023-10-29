@@ -313,9 +313,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e00756fa735a43b69739280899d30664, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  gameContainer: {fileID: 11400000, guid: 4c0c23c9a6d3a95458482721097c6d25, type: 2}
   ItemSpriteImage: {fileID: 5862616326931319750}
   SelectionVisual: {fileID: 5862616325728210464}
-  <Item>k__BackingField: {fileID: 0}
 --- !u!1 &5862616326931319748
 GameObject:
   m_ObjectHideFlags: 0
@@ -382,7 +382,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: e6f30403ae1fad04a84f91d7c9868e52, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 591574a886e807548b2c18f3fccff815, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1

@@ -9,7 +9,7 @@ namespace CURSR.Settings
         public PlayerMovementSettings PlayerMovementSettings;
         public PlayerViewSettings PlayerViewSettings;
         public PlayerInteractionSettings PlayerInteractionSettings;
-        public PlayerInventorySettings PlayerInventorySettings;
+        public PlayerHotbarSettings PlayerHotbarSettings;
     }
     
     [System.Serializable]
@@ -37,13 +37,13 @@ namespace CURSR.Settings
     [System.Serializable]
     public class PlayerInteractionSettings
     {
-        [field:SerializeField] public float rayDistance { get; private set; }
-        [field:SerializeField] public LayerMask hitLayers { get; private set; }
+        [field:SerializeField] public float RayDistance { get; private set; }
+        [field:SerializeField] public LayerMask HitLayers { get; private set; }
     }
 
     [System.Serializable]
-    public class PlayerInventorySettings
+    public class PlayerHotbarSettings
     {
-        [field:SerializeField] public int MaxInventoryHotbar { get; private set; }
+        [field:SerializeField] public int MaxCapacity { get; private set; }
     }
 }

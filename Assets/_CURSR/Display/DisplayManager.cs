@@ -39,7 +39,9 @@ namespace CURSR.Display
         private void BindToPlayer(Player player)
         {
             boundPlayer = player;
-            player.ChangeHotbarSelection += hotbar.SelectItemInHotbar;
+            player.ChangeHotbarSelection += hotbar.SelectItemDisplay;
+            player.PickupItem += hotbar.BindItem;
+            player.DropItem += hotbar.UnbindItem;
             // TODO: item hovering display
             //player.HoverOverItem += 
             //player.UnHoverOverItem +=
